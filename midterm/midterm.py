@@ -59,7 +59,7 @@ x4 = data[:,4]  # clouds_all
 x = np.column_stack((x1,x2,x3,x4))
 
 # Now we are doing the poynomializing
-poly = PolynomialFeatures(degree=6, include_bias=False) # CHANGE DEGREE HERE
+poly = PolynomialFeatures(degree=5, include_bias=False) # CHANGE DEGREE HERE
 data = poly.fit_transform(x)
 
 # Scale data using minmax
@@ -71,7 +71,7 @@ x = np.c_[np.ones(x.shape[0]), x]
 
 # Set up the learning model
 #model = LinearRegression()
-model = Ridge(alpha = .001)
+model = Ridge(alpha = .0001)
 
 #my = 2          # tell y where to stop at
 #mx = len(y) - .2*len(y) # Tell x where to stop at
