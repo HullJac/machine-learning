@@ -18,7 +18,7 @@ def plot_learning_curves(model,X,y):  #, mx, my):
 
     train_errors,val_errors=[],[]
 
-    for m in range(1,len(X_train)):
+    for m in range(25,len(X_train)): # I changed this from one to 25 and it seemed to do better
         model.fit(X_train[:m],y_train[:m])
         y_train_predict=model.predict(X_train[:m])
         y_val_predict=model.predict(X_val)
@@ -49,8 +49,16 @@ rawData = pd.read_csv('Traffic.csv')
 #scatter_matrix(rawData[attributes])
 #plt.show()
 
+
 # Put features together that we want
+#print(rawData)
 data = rawData.to_numpy()
+#print(data)
+# Grabbing a subset of data
+#data = data[np.random.choice(data.shape[0], 2000, replace=False), :]
+#print(data)
+#print(len(data))
+
 y = data[:,0]   # traffic_volume
 x1 = data[:,1]  # temp
 x2 = data[:,2]  # rain_1h
@@ -59,7 +67,7 @@ x4 = data[:,4]  # clouds_all
 x = np.column_stack((x1,x2,x3,x4))
 
 # Now we are doing the poynomializing
-poly = PolynomialFeatures(degree=5, include_bias=False) # CHANGE DEGREE HERE
+poly = PolynomialFeatures(degree=14, include_bias=False) # CHANGE DEGREE HERE
 data = poly.fit_transform(x)
 
 # Scale data using minmax
@@ -71,7 +79,7 @@ x = np.c_[np.ones(x.shape[0]), x]
 
 # Set up the learning model
 #model = LinearRegression()
-model = Ridge(alpha = .0001)
+model = Ridge(alpha = .00001) # added two zeros here may be too much
 
 #my = 2          # tell y where to stop at
 #mx = len(y) - .2*len(y) # Tell x where to stop at
@@ -83,6 +91,7 @@ plt.show()
 # train to point of convergence and get your weights and you can then take inputs and get an output.
 # Then to train and test and find the weights after this
 # this is just like we did before
+
 '''
 temp = input("average temp in kelvin: ")
 rain = input("rain in mm for last : ")
