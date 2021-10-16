@@ -52,11 +52,11 @@ rawData = pd.read_csv('Traffic.csv')
 
 # Put features together that we want
 #print(rawData)
-for i in range(2):
+for i in range(10):
     data = rawData.to_numpy()
     #print(data)
     # Grabbing a subset of data
-    data = data[np.random.choice(data.shape[0], 3000, replace=False), :]
+    data = data[np.random.choice(data.shape[0], 2500, replace=False), :]
     #print(data)
     #print(len(data))
     
@@ -88,7 +88,7 @@ for i in range(2):
     # Get Ws and check how good the learning is going
     w = plot_learning_curves(model,x,y)  #, int(mx), my)
     print(w)
-    plt.savefig('plot'+str(i+10)+'.png', dpi=300, bbox_inches ='tight')
+    plt.savefig('25,2500,15,00001,plot'+str(i+10)+'.png', dpi=300, bbox_inches ='tight')
 #plt.show()
 # train to point of convergence and get your weights and you can then take inputs and get an output.
 # Then to train and test and find the weights after this
