@@ -18,7 +18,7 @@ def plot_learning_curves(model,X,y):  #, mx, my):
 
     train_errors,val_errors=[],[]
 
-    for m in range(25,len(X_train)): # I changed this from one to 25 and it seemed to do better
+    for m in range(1,len(X_train)): # I changed this from one to 25 and it seemed to do better
         model.fit(X_train[:m],y_train[:m])
         y_train_predict=model.predict(X_train[:m])
         y_val_predict=model.predict(X_val)
@@ -52,11 +52,11 @@ rawData = pd.read_csv('Traffic.csv')
 
 # Put features together that we want
 #print(rawData)
-for i in range(10):
+for i in range(1):
     data = rawData.to_numpy()
     #print(data)
     # Grabbing a subset of data
-    data = data[np.random.choice(data.shape[0], 2500, replace=False), :]
+    #data = data[np.random.choice(data.shape[0], 5000, replace=False), :]
     #print(data)
     #print(len(data))
     
@@ -68,7 +68,7 @@ for i in range(10):
     x = np.column_stack((x1,x2,x3,x4))
     
     # Now we are doing the poynomializing
-    poly = PolynomialFeatures(degree=15, include_bias=False) # CHANGE DEGREE HERE
+    poly = PolynomialFeatures(degree=10, include_bias=False) # CHANGE DEGREE HERE
     data = poly.fit_transform(x)
     
     # Scale data using minmax
@@ -79,17 +79,16 @@ for i in range(10):
     x = np.c_[np.ones(x.shape[0]), x]
     
     # Set up the learning model
-    #model = LinearRegression()
     model = Ridge(alpha = .00001) # added two zeros here may be too much
     
-    #my = 2          # tell y where to stop at
+    #my = 2500          # tell y where to stop at
     #mx = len(y) - .2*len(y) # Tell x where to stop at
     
     # Get Ws and check how good the learning is going
     w = plot_learning_curves(model,x,y)  #, int(mx), my)
     print(w)
-    plt.savefig('25,2500,15,00001,plot'+str(i+10)+'.png', dpi=300, bbox_inches ='tight')
-#plt.show()
+    plt.savefig('1,all,10,00001,'+str(i)+'.png', dpi=300, bbox_inches ='tight')
+    plt.show()
 # train to point of convergence and get your weights and you can then take inputs and get an output.
 # Then to train and test and find the weights after this
 # this is just like we did before
