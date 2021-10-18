@@ -56,7 +56,7 @@ for i in range(1):
     data = rawData.to_numpy()
     #print(data)
     # Grabbing a subset of data
-    #data = data[np.random.choice(data.shape[0], 5000, replace=False), :]
+    data = data[np.random.choice(data.shape[0], 30000, replace=False), :]
     #print(data)
     #print(len(data))
     
@@ -68,7 +68,7 @@ for i in range(1):
     x = np.column_stack((x1,x2,x3,x4))
     
     # Now we are doing the poynomializing
-    poly = PolynomialFeatures(degree=10, include_bias=False) # CHANGE DEGREE HERE
+    poly = PolynomialFeatures(degree=8, include_bias=False) # CHANGE DEGREE HERE
     data = poly.fit_transform(x)
     
     # Scale data using minmax
@@ -87,8 +87,8 @@ for i in range(1):
     # Get Ws and check how good the learning is going
     w = plot_learning_curves(model,x,y)  #, int(mx), my)
     print(w)
-    plt.savefig('1,all,10,00001,'+str(i)+'.png', dpi=300, bbox_inches ='tight')
-    plt.show()
+    plt.savefig('1,30000,8,00001'+str(i)+'.png', dpi=300, bbox_inches ='tight')
+#plt.show()
 # train to point of convergence and get your weights and you can then take inputs and get an output.
 # Then to train and test and find the weights after this
 # this is just like we did before
