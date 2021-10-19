@@ -56,7 +56,7 @@ for i in range(1):
     data = rawData.to_numpy()
     #print(data)
     # Grabbing a subset of data
-    data = data[np.random.choice(data.shape[0], 30000, replace=False), :]
+    #data = data[np.random.choice(data.shape[0], 30000, replace=False), :]
     #print(data)
     #print(len(data))
     
@@ -79,7 +79,7 @@ for i in range(1):
     x = np.c_[np.ones(x.shape[0]), x]
     
     # Set up the learning model
-    model = Ridge(alpha = .00001) # added two zeros here may be too much
+    model = Ridge(alpha = .001) # added two zeros here may be too much
     
     #my = 2500          # tell y where to stop at
     #mx = len(y) - .2*len(y) # Tell x where to stop at
@@ -87,7 +87,7 @@ for i in range(1):
     # Get Ws and check how good the learning is going
     w = plot_learning_curves(model,x,y)  #, int(mx), my)
     print(w)
-    plt.savefig('1,30000,8,00001'+str(i)+'.png', dpi=300, bbox_inches ='tight')
+    plt.savefig('1,all,8,00001'+str(i)+'.png', dpi=300, bbox_inches ='tight')
 #plt.show()
 # train to point of convergence and get your weights and you can then take inputs and get an output.
 # Then to train and test and find the weights after this
