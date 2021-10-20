@@ -69,6 +69,12 @@ plt.show()
 data = rawData.to_numpy()
 #print(data)
 
+# Get information about the dataset using pandas dataframe
+# Commented out to not clutter output of running the program
+#rawData.info()
+#print(rawData.describe())
+#sys.exit()
+
 # The line below is how I picked a random subset of the data
 # Changing the second parameter will change the size of the data sampled
 #data = data[np.random.choice(data.shape[0], 5000, replace=False), :]
