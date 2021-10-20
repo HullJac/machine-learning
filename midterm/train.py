@@ -66,6 +66,7 @@ plt.show()
 data = rawData.to_numpy()
 #print(data)
 
+# The line below is how I picked a rnadom subset of the data
 # Grabbing a subset of data at random to help with runtime and training
 # Changing the second parameter will change the size of the data sampled
 #data = data[np.random.choice(data.shape[0], 10000, replace=False), :]
@@ -83,7 +84,7 @@ x4 = data[:,4]  # clouds_all
 x = np.column_stack((x1,x2,x3,x4))
 
 # Now we are doing the poynomializing
-poly = PolynomialFeatures(degree=7, include_bias=False)
+poly = PolynomialFeatures(degree=9, include_bias=False)
 data = poly.fit_transform(x)
 
 # Scale data using minmax
@@ -109,7 +110,3 @@ dump(poly, open('poly.pkl', 'wb'))
 
 # Show the graph from the training and testing
 plt.show()
-
-
-# Maybe export the model and then use it to do .predict on the weights and inputs
-# Do this insted of returning the weights and stuff
