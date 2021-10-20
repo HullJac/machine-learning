@@ -1,7 +1,18 @@
-# train to point of convergence and get your weights and you can then take inputs and get an output.
-# Then to train and test and find the weights after this
-# this is just like we did before
-
+'''
+Program:        Ridge Regression Model Training Using Polynomial Features on Traffic Data
+Programmer:     Jacob Hull
+Date:           10/19/21
+Description:    This Program trains the Ridge Regression model to predict traffic flow 
+                westbound on interstate 94 in Minneapolis Minnessota. It utilizes polynomial 
+                features to minimize its error of prediction of traffic flow based on the 
+                four features. The four features are temperature in kelvin, rain accumulation 
+                within the last hour, snow accumulation within the last hour, and percentage 
+                of cloud cover from the last hour. This model is trained using the 80/20 rule
+                and the error is found using the root mean squared error method. 
+                From the training we get our weight matrix, completed model, and scaler.
+                I then save those to files to be used later to predict user inputs and 
+                generate an output based on the trained model.
+'''
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -72,7 +83,7 @@ x4 = data[:,4]  # clouds_all
 x = np.column_stack((x1,x2,x3,x4))
 
 # Now we are doing the poynomializing
-poly = PolynomialFeatures(degree=7, include_bias=False) 
+poly = PolynomialFeatures(degree=7, include_bias=False)
 data = poly.fit_transform(x)
 
 # Scale data using minmax
@@ -98,3 +109,7 @@ dump(poly, open('poly.pkl', 'wb'))
 
 # Show the graph from the training and testing
 plt.show()
+
+
+# Maybe export the model and then use it to do .predict on the weights and inputs
+# Do this insted of returning the weights and stuff
