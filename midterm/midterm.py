@@ -51,12 +51,15 @@ rawData = pd.read_csv('Traffic.csv')
 
 
 # Put features together that we want
-#print(rawData)
 for i in range(1):
     data = rawData.to_numpy()
+    #data = pd.DataFrame(rawData)
+    #data.info()
+    #print(data.describe())
+    #sys.exit()
     #print(data)
     # Grabbing a subset of data
-    #data = data[np.random.choice(data.shape[0], 30000, replace=False), :]
+    #data = data[np.random.choice(data.shape[0], 5000, replace=False), :]
     #print(data)
     #print(len(data))
     
@@ -68,7 +71,7 @@ for i in range(1):
     x = np.column_stack((x1,x2,x3,x4))
     
     # Now we are doing the poynomializing
-    poly = PolynomialFeatures(degree=8, include_bias=False) # CHANGE DEGREE HERE
+    poly = PolynomialFeatures(degree=7, include_bias=False) # CHANGE DEGREE HERE
     data = poly.fit_transform(x)
     
     # Scale data using minmax
@@ -79,7 +82,7 @@ for i in range(1):
     x = np.c_[np.ones(x.shape[0]), x]
     
     # Set up the learning model
-    model = Ridge(alpha = .001) # added two zeros here may be too much
+    model = Ridge(alpha = .01) # added two zeros here may be too much
     
     #my = 2500          # tell y where to stop at
     #mx = len(y) - .2*len(y) # Tell x where to stop at
@@ -87,7 +90,7 @@ for i in range(1):
     # Get Ws and check how good the learning is going
     w = plot_learning_curves(model,x,y)  #, int(mx), my)
     print(w)
-    plt.savefig('1,all,8,00001'+str(i)+'.png', dpi=300, bbox_inches ='tight')
+    plt.savefig('1,all,7,01'+str(i)+'.png', dpi=300, bbox_inches ='tight')
 #plt.show()
 # train to point of convergence and get your weights and you can then take inputs and get an output.
 # Then to train and test and find the weights after this

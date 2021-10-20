@@ -8,6 +8,7 @@ numpy = "*"
 sklearn = "*"
 matplotlib = "*"
 pandas = "*"
+pickle-mixin = "*"
 
 [dev-packages]
 

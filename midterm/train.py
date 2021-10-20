@@ -57,7 +57,7 @@ data = rawData.to_numpy()
 
 # Grabbing a subset of data at random to help with runtime and training
 # Changing the second parameter will change the size of the data sampled
-data = data[np.random.choice(data.shape[0], 10000, replace=False), :]
+#data = data[np.random.choice(data.shape[0], 10000, replace=False), :]
 #print(data)
 #print(len(data))
 
@@ -72,7 +72,7 @@ x4 = data[:,4]  # clouds_all
 x = np.column_stack((x1,x2,x3,x4))
 
 # Now we are doing the poynomializing
-poly = PolynomialFeatures(degree=7, include_bias=False) #7
+poly = PolynomialFeatures(degree=7, include_bias=False) 
 data = poly.fit_transform(x)
 
 # Scale data using minmax
