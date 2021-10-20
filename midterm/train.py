@@ -1,17 +1,17 @@
 '''
 Program:        Ridge Regression Model Training Using Polynomial Features on Traffic Data
 Programmer:     Jacob Hull
-Date:           10/19/21
-Description:    This Program trains the Ridge Regression model to predict traffic flow 
-                westbound on interstate 94 in Minneapolis Minnessota. It utilizes polynomial 
-                features to minimize its error of prediction of traffic flow based on the 
-                four features. The four features are temperature in kelvin, rain accumulation 
-                within the last hour, snow accumulation within the last hour, and percentage 
-                of cloud cover from the last hour. This model is trained using the 80/20 rule
-                and the error is found using the root mean squared error method. 
-                From the training we get our weight matrix, completed model, and scaler.
-                I then save those to files to be used later to predict user inputs and 
-                generate an output based on the trained model.
+Date:           10/20/21
+Description:    This Program trains the Ridge Regression and Polynomial models to predict 
+                traffic flow westbound on interstate 94 in Minneapolis Minnessota. It 
+                utilizes polynomial features to minimize its error of prediction of traffic 
+                flow based on the four features I have chosen. The four features are 
+                temperature in kelvin, rain accumulation within the last hour, snow 
+                accumulation within the last hour, and percentage of cloud cover from the 
+                last hour. This model is trained using the 80/20 rule and the error is found 
+                using the root mean squared error method. From the training we get our weight 
+                matrix, completed model, and scaler. I then save those to files to be used later 
+                to predict user inputs and generate an output based on the trained model.
 '''
 import pandas as pd
 import numpy as np
@@ -27,7 +27,7 @@ from sklearn.linear_model import Ridge
 from pickle import dump
 
 # Function that trains and validates the model using the 80/20 rule
-# It returns the wights found from the training
+# It returns the weights found from the training
 def plot_learning_curves(model,X,y):
     X_train,X_val,y_train,y_val=train_test_split(X,y,test_size=0.2)
 
@@ -66,10 +66,9 @@ plt.show()
 data = rawData.to_numpy()
 #print(data)
 
-# The line below is how I picked a rnadom subset of the data
-# Grabbing a subset of data at random to help with runtime and training
+# The line below is how I picked a random subset of the data
 # Changing the second parameter will change the size of the data sampled
-data = data[np.random.choice(data.shape[0], 5000, replace=False), :]
+#data = data[np.random.choice(data.shape[0], 5000, replace=False), :]
 #print(data)
 #print(len(data))
 
