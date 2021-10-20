@@ -69,7 +69,7 @@ data = rawData.to_numpy()
 # The line below is how I picked a rnadom subset of the data
 # Grabbing a subset of data at random to help with runtime and training
 # Changing the second parameter will change the size of the data sampled
-#data = data[np.random.choice(data.shape[0], 10000, replace=False), :]
+data = data[np.random.choice(data.shape[0], 5000, replace=False), :]
 #print(data)
 #print(len(data))
 
@@ -95,7 +95,7 @@ x = minmax.fit_transform(data)
 x = np.c_[np.ones(x.shape[0]), x]
 
 # Set up the learning model
-model = Ridge(alpha = 0.01) 
+model = Ridge(alpha = 0.01)
 
 # Get Ws and check how good the learning is going
 w = plot_learning_curves(model,x,y)
