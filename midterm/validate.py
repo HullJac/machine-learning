@@ -1,3 +1,16 @@
+'''
+Program:        Showcase For Ridge Regression Using Polynomial Features To Traffic Data
+Programmer:     Jacob Hull
+Date:           10/20/21
+Description:    This Program uses the polynomial features, scaler, and weights from the trained
+                Ridge Regression model to predict the flow of traffic on interstate 94 in 
+                Minneapolis Minnesota based on user input. It loads the previous mentioned
+                information from files that were saved by the train.py file so we do not have to 
+                train the model everytime we want to predict the traffic flow. I then transform the 
+                user input into the proper form so that I can calculate a predicted value based on 
+                the trained model. The predicted value is then shown to the user in an easily 
+                readable format.
+'''
 from pickle import load
 import numpy as np
 
