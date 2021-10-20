@@ -12,6 +12,9 @@ Description:    This Program trains the Ridge Regression and Polynomial models t
                 using the root mean squared error method. From the training we get our weight 
                 matrix, completed model, and scaler. I then save those to files to be used later 
                 to predict user inputs and generate an output based on the trained model.
+
+                To run this program, you need to have the Traffic.csv file in the same
+                directory as this program or change the path to find the data file.
 '''
 import pandas as pd
 import numpy as np
