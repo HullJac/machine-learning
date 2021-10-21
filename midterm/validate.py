@@ -12,8 +12,8 @@ Description:    This Program uses the polynomial features, scaler, and weights f
                 readable format.
 
                 To run this program, you need to have ran the train.py program as it creates
-                the model and files needed to predict the traffic flow value.  The files created
-                by the train.py file must be in the same directory as this program.
+                the model and files needed to predict the traffic flow value. The files created
+                by the train.py file must be in the same directory as this program to run.
                 Those files are w.txt, poly.pkl, and minmax.pkl.
 '''
 from pickle import load
