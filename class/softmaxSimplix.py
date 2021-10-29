@@ -74,6 +74,8 @@ plt.xlabel("pedal Length")
 plt.ylabel("pedal Width")
 plt.show()
 
+##########
+'''
 #functions we are going to use
 # Softmax for matricies hacked to work
 def softmax(z): # z is a matrix
@@ -217,7 +219,7 @@ PW[:] = (PW[:]-PW[:].mean())/PW[:].std()
 
 plt.scatter(PL, PW, c=color_indices, cmap = colormap)
 plt.show()
-
+'''
 
 #############################################
 # it is sciklearn brain on neutral time
