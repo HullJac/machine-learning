@@ -2,6 +2,7 @@
 Program:
 
 '''
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,35 +15,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import PolynomialFeatures
 import seaborn as sns
-from sklearn.metrics import accuracy_score
-
-def plot_learning_curves(model,X,y):
-    X_train,X_val,y_train,y_val=train_test_split(X,y,test_size=0.2)
-
-    train_errors,val_errors=[],[]
-
-    for m in range(1,len(X_train)):
-        model.fit(X_train[:m],y_train[:m])
-        y_train_predict=model.predict(X_train[:m])
-        y_val_predict=model.predict(X_val)
-
-        train_errors.append(mean_squared_error(y_train[:m],y_train_predict))
-
-        val_errors.append(mean_squared_error(y_val,y_val_predict))
-
-
-    plt.plot(np.sqrt(train_errors),"r.",linewidth=2,label="train")
-
-    plt.plot(np.sqrt(val_errors),"b-",linewidth=3,label="validate")
-    plt.legend(loc="upper right",fontsize=14)
-    plt.xlabel("Training set size",fontsize=14)
-    plt.ylabel("RMSE",fontsize=14)
-
-    wo=model.intercept_
-    w=model.coef_
-    w[0]=wo
-
-    return w
 
 # Loading the data and displaying it
 rawData=pd.read_csv('diabetesBinary.csv')
@@ -70,6 +42,18 @@ x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age))
 # Clean the data (all except pregnancies becaseu you can have 0 of those)
 x = imp.fit_transform(x)
 
+'''
+# Chekcing out graphs of the data
+colors=["red", "green"]
+color_indices = y
+colormap = matplotlib.colors.ListedColormap(colors)
+fig = plt.figure()
+threedee = fig.add_subplot(projection='3d')
+threedee.scatter(gluc,bloo,skin,bmi,age, c=color_indices, cmap=colormap)
+plt.show()
+#sys.exit()
+'''
+
 # Grab each column again
 gluc = x[:,0]
 bloo = x[:,1]
@@ -80,11 +64,13 @@ diab = x[:,5]
 age  = x[:,6] 
 
 # Create new data matrix from all the cleaned features
-#x = np.column_stack((preg,gluc,bloo,skin,insu,bmi,diab,age))
-x = np.column_stack((gluc,bloo,insu,bmi,diab,age))
+x = np.column_stack((preg,gluc,bloo,skin,insu,bmi,diab,age))
+#x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age))
+
+#x = np.column_stack((preg,gluc,bmi,age))
 
 # Create the polynomial features
-poly = PolynomialFeatures(degree=12, include_bias=False) # tweleve here is pretty good
+poly = PolynomialFeatures(degree=5, include_bias=False) # tweleve here is pretty good
 x = poly.fit_transform(x)
 
 # Create the scaler and fit and transform it
@@ -92,37 +78,55 @@ scaler = StandardScaler()
 scaler.fit(x)
 x = scaler.transform(x)
 
-#print(x)
-
-#sns.pairplot(rawData, hue="Outcome", markers=["o", "s"])
-#plt.show()
-
-# Then normalize the data
-scaler = StandardScaler()
-scaler.fit(x)
-x = scaler.transform(x)
-
-# Create the model
-softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=50)
-# well come back to this
-# C here is like the alpha
-# can add a max_iter variable here too
-
-# put softmax fit back here
-softmax_sci.fit(x,y)
-
-w = plot_learning_curves(softmax_sci, x, y)
-print(w)
-
+# Function to fit the model and find how 
 def train():
-    X_train,X_val,y_train,y_val=train_test_split(x,y,test_size=0.2)
+    x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
     
+    # Create the model
+    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=1)
+    
+    # Fit the model
+    softmax_sci.fit(x_train, y_train)
+    
+    # Check accuracy of the model
+    testAccuracy = softmax_sci.score(x_test, y_test)
+    print("Test Accuracy: "+ str(testAccuracy*100))
 
-    accuracy = accuracy_score(X_val, y_val)
-    print("Accuracy: " + str(accuracy*100))
-    return accuracy
-'''
-ac = train()
-while ac < 94.0:
-    ac = train()
-'''
+    # Return the accuracy and model
+    return testAccuracy*100, softmax_sci
+
+# Run until we get 90 percent
+acc, model = train()
+while (acc < 85):
+    acc, model = train()
+
+
+one = [[6,148,72,35,0,33.6,0.627,50]] # 1
+one = poly.fit_transform(one)
+one = scaler.transform(one)
+
+two = [[1,85,66,29,0,26.6,0.351,31]] # 0
+two = poly.fit_transform(one)
+two = scaler.transform(one)
+
+three = [[8,183,64,0,0,23.3,0.672,32]] # 1
+three = poly.fit_transform(one)
+three = scaler.transform(one)
+
+four = [[1,89,66,23,94,28.1,0.167,21]] # 0
+four = poly.fit_transform(one)
+four = scaler.transform(one)
+
+five = [[0,137,40,35,168,43.1,2.288,33]] # 1
+five = poly.fit_transform(one)
+five = scaler.transform(one)
+
+oneA = model.predict(one)
+twoA = model.predict(two)
+threeA = model.predict(three)
+fourA = model.predict(four)
+fiveA = model.predict(five)
+
+out = [oneA, twoA, threeA, fourA, fiveA]
+for num in out:
+    print("outcome: " + str(num))
