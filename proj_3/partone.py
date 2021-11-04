@@ -14,7 +14,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import PolynomialFeatures
-import seaborn as sns
 
 # Loading the data and displaying it
 rawData=pd.read_csv('diabetesBinary.csv')
@@ -65,12 +64,11 @@ age  = x[:,6]
 
 # Create new data matrix from all the cleaned features
 x = np.column_stack((preg,gluc,bloo,skin,insu,bmi,diab,age))
-#x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age))
 
 #x = np.column_stack((preg,gluc,bmi,age))
 
 # Create the polynomial features
-poly = PolynomialFeatures(degree=5, include_bias=False) # tweleve here is pretty good
+poly = PolynomialFeatures(degree=3, include_bias=False) # tweleve here is pretty good
 x = poly.fit_transform(x)
 
 # Create the scaler and fit and transform it
@@ -83,7 +81,7 @@ def train():
     x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
     
     # Create the model
-    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=1)
+    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=0.1)
     
     # Fit the model
     softmax_sci.fit(x_train, y_train)
@@ -106,27 +104,37 @@ one = poly.fit_transform(one)
 one = scaler.transform(one)
 
 two = [[1,85,66,29,0,26.6,0.351,31]] # 0
-two = poly.fit_transform(one)
-two = scaler.transform(one)
+two = poly.fit_transform(two)
+two = scaler.transform(two)
 
 three = [[8,183,64,0,0,23.3,0.672,32]] # 1
-three = poly.fit_transform(one)
-three = scaler.transform(one)
+three = poly.fit_transform(three)
+three = scaler.transform(three)
 
 four = [[1,89,66,23,94,28.1,0.167,21]] # 0
-four = poly.fit_transform(one)
-four = scaler.transform(one)
+four = poly.fit_transform(four)
+four = scaler.transform(four)
 
 five = [[0,137,40,35,168,43.1,2.288,33]] # 1
-five = poly.fit_transform(one)
-five = scaler.transform(one)
+five = poly.fit_transform(five)
+five = scaler.transform(five)
+
+six = [[9,154,78,30,100,30.9,0.164,45]] # 0
+six = poly.fit_transform(six)
+six = scaler.transform(six)
+
+seven = [[3,169,74,19,125,29.9,0.268,31]] # 1
+seven = poly.fit_transform(seven)
+seven = scaler.transform(seven)
 
 oneA = model.predict(one)
 twoA = model.predict(two)
 threeA = model.predict(three)
 fourA = model.predict(four)
 fiveA = model.predict(five)
+sixA = model.predict(six)
+sevenA = model.predict(seven)
 
-out = [oneA, twoA, threeA, fourA, fiveA]
+out = [oneA, twoA, threeA, fourA, fiveA, sixA, sevenA]
 for num in out:
     print("outcome: " + str(num))
