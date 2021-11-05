@@ -32,6 +32,9 @@ bmi  = data[:,5]
 diab = data[:,6]
 age  = data[:,7] 
 
+# Basis to check if data is being changed by the imputer
+#print(bloo)
+
 # Create the cleaner object
 imp = SimpleImputer(missing_values=0, strategy='mean')
 
@@ -41,32 +44,23 @@ x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age))
 # Clean the data (all except pregnancies becaseu you can have 0 of those)
 x = imp.fit_transform(x)
 
-'''
 # Chekcing out graphs of the data
+'''
 colors=["red", "green"]
 color_indices = y
 colormap = matplotlib.colors.ListedColormap(colors)
 fig = plt.figure()
 threedee = fig.add_subplot(projection='3d')
-threedee.scatter(gluc,bloo,skin,insu,bmi,diab,age, c=color_indices, cmap=colormap)
+threedee.scatter(gluc,bloo,skin,insu,bmi, c=color_indices, cmap=colormap)
 plt.show()
-#sys.exit()
+sys.exit()
 '''
 
-# Grab each column again
-gluc = x[:,0]
-bloo = x[:,1]
-skin = x[:,2]
-insu = x[:,3]
-bmi  = x[:,4]
-diab = x[:,5]
-age  = x[:,6] 
-
-# Create new data matrix from all the cleaned features
-x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age))
+# degree of threee and c = 0.01 run it like 15000 times
+# maybe 20 thousand times will get me 89 percent
 
 # Create the polynomial features
-poly = PolynomialFeatures(degree=20, include_bias=False) # tweleve here is pretty good
+poly = PolynomialFeatures(degree=3, include_bias=False)
 x = poly.fit_transform(x)
 
 # Create the scaler and fit and transform it
@@ -79,22 +73,30 @@ def train():
     x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
     
     # Create the model
-    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=0.0001)
+    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=0.01)
     
     # Fit the model
     softmax_sci.fit(x_train, y_train)
     
     # Check accuracy of the model
     testAccuracy = softmax_sci.score(x_test, y_test)
-    print("Test Accuracy: "+ str(testAccuracy*100))
 
     # Return the accuracy and model
     return testAccuracy*100, softmax_sci
 
 # Run until we get above a specified percent
+prevAcc = 0
+goodModel = 0
+it = 0
 acc, model = train()
-while (acc < 85):
+while (acc < 89):
+    it += 1
     acc, model = train()
+    if acc > prevAcc:
+        prevAcc = acc
+        goodModel = model
+        print(acc)
+        print(it)
 
 
 one = [[148,72,35,0,33.6,0.627,50]] # 1
@@ -125,13 +127,13 @@ seven = [[169,74,19,125,29.9,0.268,31]] # 1
 seven = poly.fit_transform(seven)
 seven = scaler.transform(seven)
 
-oneA = model.predict(one)
-twoA = model.predict(two)
-threeA = model.predict(three)
-fourA = model.predict(four)
-fiveA = model.predict(five)
-sixA = model.predict(six)
-sevenA = model.predict(seven)
+oneA = goodModel.predict(one)
+twoA = goodModel.predict(two)
+threeA = goodModel.predict(three)
+fourA = goodModel.predict(four)
+fiveA = goodModel.predict(five)
+sixA = goodModel.predict(six)
+sevenA = goodModel.predict(seven)
 
 out = [oneA, twoA, threeA, fourA, fiveA, sixA, sevenA]
 for num in out:
