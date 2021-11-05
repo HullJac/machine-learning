@@ -1,3 +1,16 @@
+'''
+Program:        SVM Model Training and Testing With Kernel Trick And Polynomial Features On Red Wine Data
+Programmer:     Jacob Hull
+Date:           11/5/21
+Description:    This program trains the SVM model with polynomial features to predict the 
+                quality of a wine given its basic properties. It utilizes polynomial 
+                features to minimize the error of prediction of quality based on the features 
+                I have chosen. The features are fixed acidity, citric acid, residual sugar,
+                sulphates, and alcohol. Many models are trained using the 80/20 rule and the 
+                best is chosen by percent accuracy of the predictions from the testing data.
+                I then take in new data from another csv file and predict the outcome of the
+                data given to see how my model performs with data not found in the dataset.
+'''
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -25,14 +38,12 @@ rawData=pd.read_csv('winequality-redMulti.csv')
 # Getting information about the dataset
 #print(rawData.describe())
 
-'''
 # Create a heat map of the data
 f,ax = plt.subplots(figsize=(18, 18))
 sns.heatmap(rawData.corr(), annot=True, linewidths=.5, fmt= '.1f',ax=ax)
 plt.show()
 # A lot of correlation between citric acid, density, and fixed acidity, so I dropped them
 # Also seems that free sulfur dioxide and total sulfur dioxide are related
-'''
 
 '''
 scatter_matrix(rawData)
@@ -55,7 +66,6 @@ sulphates = data[:,9]
 alcohol = data[:,10]
 y = data[:,11] # quality
 
-'''
 # Graphing
 colors=["red", "green", "blue", "black", "yellow", "purple"]
 color_indices = y
@@ -64,12 +74,11 @@ colormap = matplotlib.colors.ListedColormap(colors)
 fig = plt.figure()
 threedee = fig.add_subplot(projection='3d')
 
-#threedee.scatter(resSugar, chlorides, pH, sulphates, alcohol, c=color_indices, cmap=colormap)
-#threedee.scatter(fixedAcid, citAcid, resSugar, sulphates, alcohol, c=color_indices, cmap=colormap) # positive correlation
-threedee.scatter(chlorides, FSD, TSD, density, pH, c=color_indices, cmap=colormap) # negative correltion
+#threedee.scatter(resSugar, chlorides, pH, sulphates, alcohol, c=color_indices, cmap=colormap) #possible correlation
+threedee.scatter(fixedAcid, citAcid, resSugar, sulphates, alcohol, c=color_indices, cmap=colormap) # positive correlation
+#threedee.scatter(chlorides, FSD, TSD, density, pH, c=color_indices, cmap=colormap) # negative correltion
 
 plt.show()
-'''
 
 # Pick the Xs that seem the best from heatmap and graphing
 #x = np.column_stack((fixedAcid,volAcid,citAcid,resSugar,chlorides,FSD,TSD,density,pH,sulphates,alcohol))# everything
@@ -117,7 +126,7 @@ it = 0
 acc, model = train()
 print(acc)
 bestAcc = acc
-while (acc < 67):
+while (acc < 66):
     it += 1
     acc, model = train()
     if acc > bestAcc:
@@ -130,7 +139,8 @@ while (acc < 67):
 one = [[0.32,1.4,0.056000000000000000,3.22,0.82,10.3]] # 7
 one = scaler.transform(one)
 
-two = [[0.655,2.3,0.083,3.17,0.66,9.8]] # 5
+#two = [[8.1,0.66,0.22,2.2,0.069,9.0,23.0,0.9968,3.3,1.2,10.3]] # 5
+two = [[8.1,0.66,0.22,2.2,0.069,9.0,23.0,0.9968,3.3,1.2,10.3]] # 5
 two = scaler.transform(two)
 
 oneA = model.predict(one)

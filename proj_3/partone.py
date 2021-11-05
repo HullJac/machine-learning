@@ -1,11 +1,21 @@
 '''
-Program:
-
+Program:        Softmax Regression Model Training and Testing Using Polynomial Features On Diabetes Data
+Programmer:     Jacob Hull
+Date:           11/5/21
+Description:    This program trains the Softmax Regression model with polynomial features to
+                predict the likelyhood of somone getting diabetes. It utilizes polynomial 
+                features to minimize the error of prediction of diabetes based on the features 
+                I have chosen. The features are everything except pregnancies. Many models are 
+                trained using the 80/20 rule and the best is chosen by percent accuracy of the
+                predictions from the testing data. I then take in new data from another csv file
+                and predict the outcome of the data given to see how my model performs with data
+                not found in the dataset.
 '''
 import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from pandas.plotting import scatter_matrix
@@ -15,9 +25,16 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import PolynomialFeatures
 
-# Loading the data and displaying it
+# Loading the data
 rawData=pd.read_csv('diabetesBinary.csv')
 data = rawData.to_numpy()
+
+# Create a heat map of the data
+'''
+f,ax = plt.subplots(figsize=(18, 18))
+sns.heatmap(rawData.corr(), annot=True, linewidths=.5, fmt= '.1f',ax=ax)
+plt.show()
+'''
 
 # Separate the y column
 y = data[:,-1]
@@ -39,12 +56,12 @@ age  = data[:,7]
 imp = SimpleImputer(missing_values=0, strategy='mean')
 
 # Create the data matrix to clean
-x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age))
+x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age)) # I am using everything but pregnancies
 
 # Clean the data (all except pregnancies becaseu you can have 0 of those)
 x = imp.fit_transform(x)
 
-# Chekcing out graphs of the data
+# Chekcing out 3-D graphs of the data
 '''
 colors=["red", "green"]
 color_indices = y
@@ -60,7 +77,7 @@ sys.exit()
 # maybe 20 thousand times will get me 89 percent
 
 # Create the polynomial features
-poly = PolynomialFeatures(degree=3, include_bias=False)
+poly = PolynomialFeatures(degree=5, include_bias=False)
 x = poly.fit_transform(x)
 
 # Create the scaler and fit and transform it
@@ -73,7 +90,7 @@ def train():
     x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
     
     # Create the model
-    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=0.01)
+    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=1)
     
     # Fit the model
     softmax_sci.fit(x_train, y_train)
@@ -89,7 +106,8 @@ prevAcc = 0
 goodModel = 0
 it = 0
 acc, model = train()
-while (acc < 89):
+print(acc)
+while (acc < 87):
     it += 1
     acc, model = train()
     if acc > prevAcc:
