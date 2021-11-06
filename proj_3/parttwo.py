@@ -28,7 +28,7 @@ import seaborn as sns
 from sklearn.svm import SVC
 
 '''
-# Help supress warnings I am getting for large polys
+# Help supress warnings for data display like graphing
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 '''
@@ -38,18 +38,22 @@ rawData=pd.read_csv('winequality-redMulti.csv')
 # Getting information about the dataset
 #print(rawData.describe())
 
+'''
 # Create a heat map of the data
 f,ax = plt.subplots(figsize=(18, 18))
 sns.heatmap(rawData.corr(), annot=True, linewidths=.5, fmt= '.1f',ax=ax)
 plt.show()
 # A lot of correlation between citric acid, density, and fixed acidity, so I dropped them
 # Also seems that free sulfur dioxide and total sulfur dioxide are related
+'''
 
+# Scatter matrix
 '''
 scatter_matrix(rawData)
 plt.show()
 '''
 
+# Convert to numpy
 data = rawData.to_numpy()
 
 # separate the data 
@@ -67,6 +71,7 @@ alcohol = data[:,10]
 y = data[:,11] # quality
 
 # Graphing
+'''
 colors=["red", "green", "blue", "black", "yellow", "purple"]
 color_indices = y
 colormap = matplotlib.colors.ListedColormap(colors)
@@ -77,15 +82,16 @@ threedee = fig.add_subplot(projection='3d')
 #threedee.scatter(resSugar, chlorides, pH, sulphates, alcohol, c=color_indices, cmap=colormap) #possible correlation
 threedee.scatter(fixedAcid, citAcid, resSugar, sulphates, alcohol, c=color_indices, cmap=colormap) # positive correlation
 #threedee.scatter(chlorides, FSD, TSD, density, pH, c=color_indices, cmap=colormap) # negative correltion
-
 plt.show()
+'''
 
 # Pick the Xs that seem the best from heatmap and graphing
-#x = np.column_stack((fixedAcid,volAcid,citAcid,resSugar,chlorides,FSD,TSD,density,pH,sulphates,alcohol))# everything
+x = np.column_stack((fixedAcid,volAcid,citAcid,resSugar,chlorides,FSD,TSD,density,pH,sulphates,alcohol))# everything
+
 #x = np.column_stack((volAcid, resSugar, chlorides, pH, sulphates, alcohol)) # no correlation
 #x = np.column_stack((fixedAcid, volAcid, pH, alcohol)) # by eyeball
 
-x = np.column_stack((fixedAcid,citAcid,resSugar,sulphates,alcohol))# related to quality positivly
+#x = np.column_stack((fixedAcid,citAcid,resSugar,sulphates,alcohol))# related to quality positivly
 #x = np.column_stack((volAcid, chlorides, FSD, TSD, density, pH))# related to quality negatively
 
 # Set up the scaler
@@ -106,10 +112,10 @@ def train():
     #model = svm.SVC(kernel='poly', coef0=1, degree=5, max_iter=1000000000, C=10)
     # got to 66% at 111 iterations
     
-    #model = svm.SVC(kernel='poly', coef0=1, degree=3, max_iter=1000000000, C=10)
+    model = svm.SVC(kernel='poly', coef0=1, degree=3, max_iter=1000000000, C=10)
     # model that does fairly well with all features
     
-    model = svm.SVC(kernel='poly', coef0=1, degree=7, max_iter=1000000000, C=10)
+    #model = svm.SVC(kernel='poly', coef0=1, degree=10, max_iter=1000000000, C=10)
     # got to 66 at 18 iterations and also 4
     # these were based on the quality positively
 
@@ -123,29 +129,52 @@ def train():
     return testAccuracy*100, model
     
 it = 0
+goodModel = 0
 acc, model = train()
 print(acc)
 bestAcc = acc
-while (acc < 66):
+while (acc < 70 and it < 1000):
     it += 1
     acc, model = train()
     if acc > bestAcc:
         bestAcc = acc
+        goodModel = model
         print(str(acc)+ " : " + str(it))
         
+# Loading the input data
+inpData=pd.read_csv('wineInput.csv')
+inp = inpData.to_numpy()
 
-'''
-#one = [[9.6,0.32,0.47,1.4,0.056000000000000000,9.0,24.0,0.99695,3.22,0.82,10.3]] # 7
-one = [[0.32,1.4,0.056000000000000000,3.22,0.82,10.3]] # 7
-one = scaler.transform(one)
+# Separate the differet features
+fixedAcid = inp[:,0]
+volAcid =   inp[:,1]
+citAcid =   inp[:,2]
+resSugar =  inp[:,3]
+chlorides = inp[:,4]
+FSD =       inp[:,5]
+TSD =       inp[:,6]
+density =   inp[:,7]
+pH =        inp[:,8]
+sulphates = inp[:,9]
+alcohol =   inp[:,10]
 
-#two = [[8.1,0.66,0.22,2.2,0.069,9.0,23.0,0.9968,3.3,1.2,10.3]] # 5
-two = [[8.1,0.66,0.22,2.2,0.069,9.0,23.0,0.9968,3.3,1.2,10.3]] # 5
-two = scaler.transform(two)
+# Create the data matrix
+#inpX = np.column_stack((fixedAcid,citAcid,resSugar,sulphates,alcohol))
+inpX = np.column_stack((fixedAcid,volAcid,citAcid,resSugar,chlorides,FSD,TSD,density,pH,sulphates,alcohol))
 
-oneA = model.predict(one)
-twoA = model.predict(two)
+# List to store output values
+output = []
 
-print(oneA)
-print(twoA)
-'''
+# Predict for each row and add then to output list
+for row in inpX:
+    predicted = goodModel.predict([row]) # check this
+    output.append(predicted)
+
+# Cast output to be a numpy array
+output = np.asarray(output)
+
+# Write output to file
+np.savetxt("output.csv", output, delimiter=',', fmt='%d')
+
+print(output)
+print(it)

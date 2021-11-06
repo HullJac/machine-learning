@@ -40,7 +40,6 @@ plt.show()
 y = data[:,-1]
 
 # Separate the differet features
-preg = data[:,0]
 gluc = data[:,1]
 bloo = data[:,2]
 skin = data[:,3]
@@ -48,9 +47,6 @@ insu = data[:,4]
 bmi  = data[:,5]
 diab = data[:,6]
 age  = data[:,7] 
-
-# Basis to check if data is being changed by the imputer
-#print(bloo)
 
 # Create the cleaner object
 imp = SimpleImputer(missing_values=0, strategy='mean')
@@ -77,7 +73,7 @@ sys.exit()
 # maybe 20 thousand times will get me 89 percent
 
 # Create the polynomial features
-poly = PolynomialFeatures(degree=5, include_bias=False)
+poly = PolynomialFeatures(degree=3, include_bias=False)
 x = poly.fit_transform(x)
 
 # Create the scaler and fit and transform it
@@ -90,7 +86,7 @@ def train():
     x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
     
     # Create the model
-    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=1)
+    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=0.001)
     
     # Fit the model
     softmax_sci.fit(x_train, y_train)
@@ -107,52 +103,49 @@ goodModel = 0
 it = 0
 acc, model = train()
 print(acc)
-while (acc < 87):
+while (acc < 90 and it < 10000):
     it += 1
     acc, model = train()
     if acc > prevAcc:
         prevAcc = acc
         goodModel = model
-        print(acc)
-        print(it)
+        print(str(acc) + " : " + str(it))
 
+# Loading the input data
+inpData=pd.read_csv('diabInput.csv')
+inp = inpData.to_numpy()
 
-one = [[148,72,35,0,33.6,0.627,50]] # 1
-one = poly.fit_transform(one)
-one = scaler.transform(one)
+# Separate the differet features
+gluc = inp[:,1]
+bloo = inp[:,2]
+skin = inp[:,3]
+insu = inp[:,4]
+bmi  = inp[:,5]
+diab = inp[:,6]
+age  = inp[:,7] 
 
-two = [[85,66,29,0,26.6,0.351,31]] # 0
-two = poly.fit_transform(two)
-two = scaler.transform(two)
+# Create the data matrix
+inpX = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age)) # I am using everything but pregnancies
 
-three = [[183,64,0,0,23.3,0.672,32]] # 1
-three = poly.fit_transform(three)
-three = scaler.transform(three)
+# Clean the data just in case of zero values
+inpX = imp.fit_transform(inpX)
 
-four = [[89,66,23,94,28.1,0.167,21]] # 0
-four = poly.fit_transform(four)
-four = scaler.transform(four)
+# Polynomialize the data
+inpX = poly.fit_transform(inpX)
 
-five = [[137,40,35,168,43.1,2.288,33]] # 1
-five = poly.fit_transform(five)
-five = scaler.transform(five)
+# List to store output values
+output = []
 
-six = [[154,78,30,100,30.9,0.164,45]] # 0
-six = poly.fit_transform(six)
-six = scaler.transform(six)
+# Predict for each row and add then to output list
+for row in inpX:
+    predicted = goodModel.predict([row]) # check this
+    output.append(predicted)
 
-seven = [[169,74,19,125,29.9,0.268,31]] # 1
-seven = poly.fit_transform(seven)
-seven = scaler.transform(seven)
+# Cast output to be a numpy array
+output = np.asarray(output)
 
-oneA = goodModel.predict(one)
-twoA = goodModel.predict(two)
-threeA = goodModel.predict(three)
-fourA = goodModel.predict(four)
-fiveA = goodModel.predict(five)
-sixA = goodModel.predict(six)
-sevenA = goodModel.predict(seven)
+# Write output to file
+np.savetxt("output.csv", output, delimiter=',', fmt='%d')
 
-out = [oneA, twoA, threeA, fourA, fiveA, sixA, sevenA]
-for num in out:
-    print("outcome: " + str(num))
+print(output)
+print(it)
