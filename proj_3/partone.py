@@ -1,7 +1,7 @@
 '''
 Program:        Softmax Regression Model Training and Testing Using Polynomial Features On Diabetes Data
 Programmer:     Jacob Hull
-Date:           11/5/21
+Date:           11/6/21
 Description:    This program trains the Softmax Regression model with polynomial features to
                 predict the likelyhood of somone getting diabetes. It utilizes polynomial 
                 features to minimize the error of prediction of diabetes based on the features 
@@ -39,7 +39,7 @@ plt.show()
 # Separate the y column
 y = data[:,-1]
 
-# Separate the differet features
+# Separate the different features
 gluc = data[:,1]
 bloo = data[:,2]
 skin = data[:,3]
@@ -57,7 +57,7 @@ x = np.column_stack((gluc,bloo,skin,insu,bmi,diab,age)) # I am using everything 
 # Clean the data (all except pregnancies becaseu you can have 0 of those)
 x = imp.fit_transform(x)
 
-# Chekcing out 3-D graphs of the data
+# Checking out 3-D graphs of the data
 '''
 colors=["red", "green"]
 color_indices = y
@@ -69,10 +69,7 @@ plt.show()
 sys.exit()
 '''
 
-# degree of threee and c = 0.01 run it like 15000 times
-# maybe 20 thousand times will get me 89 percent
-
-# Create the polynomial features
+# Create the polynomial features and fit transform it
 poly = PolynomialFeatures(degree=3, include_bias=False)
 x = poly.fit_transform(x)
 
@@ -81,12 +78,12 @@ scaler = StandardScaler()
 scaler.fit(x)
 x = scaler.transform(x)
 
-# Function to fit the model and find how 
+# Function to fit the model and find how well it did
 def train():
     x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
     
     # Create the model
-    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=0.001)
+    softmax_sci = LogisticRegression(multi_class="multinomial",solver="lbfgs", max_iter=5000, C=0.01)
     
     # Fit the model
     softmax_sci.fit(x_train, y_train)
@@ -102,17 +99,15 @@ prevAcc = 0
 goodModel = 0
 it = 0
 acc, model = train()
-print(acc)
-while (acc < 90 and it < 10000):
+while (acc < 88 and it < 10000):
     it += 1
     acc, model = train()
     if acc > prevAcc:
         prevAcc = acc
         goodModel = model
-        print(str(acc) + " : " + str(it))
 
 # Loading the input data
-inpData=pd.read_csv('diabInput.csv')
+inpData=pd.read_csv('input.csv')
 inp = inpData.to_numpy()
 
 # Separate the differet features
@@ -138,7 +133,7 @@ output = []
 
 # Predict for each row and add then to output list
 for row in inpX:
-    predicted = goodModel.predict([row]) # check this
+    predicted = goodModel.predict([row])
     output.append(predicted)
 
 # Cast output to be a numpy array
@@ -146,6 +141,3 @@ output = np.asarray(output)
 
 # Write output to file
 np.savetxt("output.csv", output, delimiter=',', fmt='%d')
-
-print(output)
-print(it)

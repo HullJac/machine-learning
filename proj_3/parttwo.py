@@ -1,15 +1,16 @@
 '''
 Program:        SVM Model Training and Testing With Kernel Trick And Polynomial Features On Red Wine Data
 Programmer:     Jacob Hull
-Date:           11/5/21
-Description:    This program trains the SVM model with polynomial features to predict the 
+Date:           11/6/21
+Description:    This program trains an SVM model with polynomial features to predict the 
                 quality of a wine given its basic properties. It utilizes polynomial 
                 features to minimize the error of prediction of quality based on the features 
-                I have chosen. The features are fixed acidity, citric acid, residual sugar,
-                sulphates, and alcohol. Many models are trained using the 80/20 rule and the 
-                best is chosen by percent accuracy of the predictions from the testing data.
-                I then take in new data from another csv file and predict the outcome of the
-                data given to see how my model performs with data not found in the dataset.
+                I have chosen. I decided to use all the features because I have had the highest
+                percentage guessed right with all of them. In the program, many models are 
+                trained using the 80/20 rule and the best is chosen by percent accuracy of 
+                the predictions from the testing data. I then take in new data from another 
+                csv file and predict the outcome of the data given to see how my model performs 
+                with data not found in the dataset.
 '''
 import pandas as pd
 import numpy as np
@@ -27,8 +28,8 @@ from sklearn import svm
 import seaborn as sns
 from sklearn.svm import SVC
 
+# Helps supress warnings for data display like graphing
 '''
-# Help supress warnings for data display like graphing
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 '''
@@ -38,13 +39,11 @@ rawData=pd.read_csv('winequality-redMulti.csv')
 # Getting information about the dataset
 #print(rawData.describe())
 
-'''
 # Create a heat map of the data
+'''
 f,ax = plt.subplots(figsize=(18, 18))
 sns.heatmap(rawData.corr(), annot=True, linewidths=.5, fmt= '.1f',ax=ax)
 plt.show()
-# A lot of correlation between citric acid, density, and fixed acidity, so I dropped them
-# Also seems that free sulfur dioxide and total sulfur dioxide are related
 '''
 
 # Scatter matrix
@@ -86,15 +85,10 @@ plt.show()
 '''
 
 # Pick the Xs that seem the best from heatmap and graphing
-x = np.column_stack((fixedAcid,volAcid,citAcid,resSugar,chlorides,FSD,TSD,density,pH,sulphates,alcohol))# everything
+# Every feature
+x = np.column_stack((fixedAcid,volAcid,citAcid,resSugar,chlorides,FSD,TSD,density,pH,sulphates,alcohol))
 
-#x = np.column_stack((volAcid, resSugar, chlorides, pH, sulphates, alcohol)) # no correlation
-#x = np.column_stack((fixedAcid, volAcid, pH, alcohol)) # by eyeball
-
-#x = np.column_stack((fixedAcid,citAcid,resSugar,sulphates,alcohol))# related to quality positivly
-#x = np.column_stack((volAcid, chlorides, FSD, TSD, density, pH))# related to quality negatively
-
-# Set up the scaler
+# Set up the scaler and fit and transform it
 scaler = StandardScaler()
 scaler.fit(x)
 x = scaler.transform(x)
@@ -102,23 +96,10 @@ x = scaler.transform(x)
 # Function to create and test the model using the 80/20 method
 def train():
     x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.2)
-
-    # Set up the model
-    #model = svm.SVC(kernel='poly', coef0=1, degree=7, max_iter=1000000000, C=0.01) # bigger C here is a softer margin
-    
-    #model = svm.SVC(kernel='poly', coef0=1, degree=15, max_iter=100000000, C=0.1)
-    # above is not bad with certain features
-    
-    #model = svm.SVC(kernel='poly', coef0=1, degree=5, max_iter=1000000000, C=10)
-    # got to 66% at 111 iterations
-    
+   
+    # Create the model
     model = svm.SVC(kernel='poly', coef0=1, degree=3, max_iter=1000000000, C=10)
-    # model that does fairly well with all features
     
-    #model = svm.SVC(kernel='poly', coef0=1, degree=10, max_iter=1000000000, C=10)
-    # got to 66 at 18 iterations and also 4
-    # these were based on the quality positively
-
     # Fit the model
     model.fit(x_train, y_train)
 
@@ -127,11 +108,11 @@ def train():
 
     # Return the accuracy and the model
     return testAccuracy*100, model
-    
+
+# Run the model until I get a higher percent accuracy
 it = 0
 goodModel = 0
 acc, model = train()
-print(acc)
 bestAcc = acc
 while (acc < 70 and it < 1000):
     it += 1
@@ -139,10 +120,9 @@ while (acc < 70 and it < 1000):
     if acc > bestAcc:
         bestAcc = acc
         goodModel = model
-        print(str(acc)+ " : " + str(it))
         
 # Loading the input data
-inpData=pd.read_csv('wineInput.csv')
+inpData=pd.read_csv('input.csv')
 inp = inpData.to_numpy()
 
 # Separate the differet features
@@ -159,7 +139,6 @@ sulphates = inp[:,9]
 alcohol =   inp[:,10]
 
 # Create the data matrix
-#inpX = np.column_stack((fixedAcid,citAcid,resSugar,sulphates,alcohol))
 inpX = np.column_stack((fixedAcid,volAcid,citAcid,resSugar,chlorides,FSD,TSD,density,pH,sulphates,alcohol))
 
 # List to store output values
@@ -167,7 +146,7 @@ output = []
 
 # Predict for each row and add then to output list
 for row in inpX:
-    predicted = goodModel.predict([row]) # check this
+    predicted = goodModel.predict([row])
     output.append(predicted)
 
 # Cast output to be a numpy array
@@ -175,6 +154,3 @@ output = np.asarray(output)
 
 # Write output to file
 np.savetxt("output.csv", output, delimiter=',', fmt='%d')
-
-print(output)
-print(it)
