@@ -79,4 +79,40 @@ plt.figure(figsize=(8,4))
 plot_decision_boundary(tree_clf, X, y)
 plt.show()
 
+angle = np.pi / 180 * 30 # change degrees to radians
 
+# create rotation matrix
+rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)]
+                            , [np.sin(angle), np.cos(angle)]])
+
+Xr = X.dot(rotation_matrix)
+
+
+tree_clf_r = DecisionTreeClassifier(random_state=42)
+tree_clf_r.fit(Xr, y)
+
+plt.figure(figsize=(8, 3))
+plot_decision_boundary(tree_clf_r, Xr, y, axes=[0.5, 7.5, -2, 0], iris=False)
+
+plt.show()
+#sys.exit()
+
+# This goes over how to fix the problem of leaves going crazy. 
+# doing the number of samples for a leaf
+from sklearn.datasets import make_moons
+Xm, ym = make_moons(n_samples=100, noise=0.25, random_state=53)
+
+deep_tree_clf1 = DecisionTreeClassifier(random_state=42)
+deep_tree_clf2 = DecisionTreeClassifier(min_samples_leaf=5, random_state=42)
+deep_tree_clf1.fit(Xm, ym)
+deep_tree_clf2.fit(Xm, ym)
+
+plt.figure(figsize= (11,4))
+plt.subplot(121)
+plot_decision_boundary(deep_tree_clf1, Xm, ym, axes=[-1.5, 2.5, -1, 1.5], iris=False)
+plt.title("No restrictions", fontsize=16)
+plt.subplot(122)
+plot_decision_boundary(deep_tree_clf2, Xm, ym, axes=[-1.5, 2.5, -1, 1.5], iris=False)
+plt.title("min_samples_leaf = {}".format(deep_tree_clf2.min_samples_leaf), fontsize=14)
+
+plt.show()

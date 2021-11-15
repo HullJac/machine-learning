@@ -14,9 +14,6 @@ from pandas.plotting import scatter_matrix
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.colors
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn import svm
-from sklearn.tree import DecisionTreeClassifier
 
 def plot_learning_curves(model,X,y,mx,my):
     X_train,X_val,y_train,y_val=train_test_split(X,y,test_size=0.2)
@@ -49,16 +46,49 @@ def plot_learning_curves(model,X,y,mx,my):
     return w
 
 
-rawData=pd.read_csv('iris.csv')
+#np.random.seed(4444444)
+rawData=pd.read_csv('winequality-redMulti.csv')
 
 data = rawData.to_numpy()
-# do not need to scale for trees ################################
 
-x = data[:,3:5]
-y = data[:,5]
+x = data[:,0:11]
+y = data[:,11]
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+x_train, x_test, y_train, y_test = train_test_split(x, y)# leaving default will be 25 75%
 
-tree_clf = DecisionTreeClassifier(max_depth=2, criterion='entropy')
+from sklearn import svm
+from sklearn.ensemble import VotingClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+
+# deliberatly making some of these bad
+log_clf = LogisticRegression(C=1, max_iter=50)
+
+tree_clf = DecisionTreeClassifier(max_depth=4)
+
+svm_clf = SVC(gamma="auto")
+
+voting_clf = VotingClassifier(
+        estimators=[('lc', log_clf), ('tc', tree_clf), ('sc', svm_clf)],
+        voting='hard')
 
 
+for clf in (log_clf, tree_clf, svm_clf, voting_clf):
+    clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+
+
+# Soft Voting
+svm_clf = SVC(probability=True, gamma = "auto")
+
+voting_clf = VotingClassifier(
+        estimators=[('lc', log_clf), ('tc', tree_clf), ('sc', svm_clf)],
+        voting='soft')
+
+for clf in (log_clf, tree_clf, svm_clf, voting_clf):
+    clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
