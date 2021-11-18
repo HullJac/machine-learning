@@ -19,7 +19,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from matplotlib.colors import ListedColormap
 from sklearn.ensemble import BaggingClassifier
-from sklearn.ensemble import RandomForestClassifier 
+from sklearn.ensemble import RandomForestClassifier
 
 #####################################################
 
@@ -52,44 +52,30 @@ y = data[:-30,0]
 #poly = PolynomialFeatures(degree=1, include_bias=False)
 #X = poly.fit_transform(X)
 
+# Scale all the data
 scaler = StandardScaler()
-#scaler = MinMaxScaler()
 scaler.fit(X)
 X = scaler.transform(X)
 testX = scaler.transform(testX)
-# Creating the classifiers to make the voitng classifier
-#tree_clf = DecisionTreeClassifier( # DecisionTree
-#        max_depth=1000,
-#        max_features=6,
-#        min_samples_leaf=0.15,
-#        min_samples_split=0.15)
-#bag_clf = BaggingClassifier( # Bagging
-#        DecisionTreeClassifier(),
-#        n_estimators=5000, # number of decision trees to train
-#        max_samples=0.5, # higher number here decreases variance, but increases bias
-#        bootstrap=True, # if this is false, it would do pasting And maks it so no repeats are chosen forthe specific node at focus right now  #########true and false do about the same
-#        n_jobs=-1,
-#        max_features=6,
-#        bootstrap_features=True)
 
+# Creating the classifiers to make the voitng classifier
 svm_clf = SVC( # SVM
-        C=1,
-        kernel='poly', 
+        C=5,
+        kernel='poly',
         coef0=1,
-        degree=3,
-        probability=True, 
-        gamma="auto", 
-        max_iter=500000)
+        degree=6, #5-8 got 86
+        probability=True,
+        gamma="auto",
+        max_iter=50000000)
 soft_clf = LogisticRegression( # SoftMmax
         multi_class="multinomial",
-        solver="lbfgs", 
-        C=30, 
-        max_iter=500000)
-rnd_clf = RandomForestClassifier( # RandomForest 
+        solver="lbfgs",
+        C=15,  # C was 30 before
+        max_iter=50000000)
+rnd_clf = RandomForestClassifier( # RandomForest
         n_estimators=2000,
-        #min_samples_split=0.05,
         bootstrap=True,
-        max_samples=0.5,
+        max_samples=0.7, # 0.7 did better thatn 0.5
         max_features=7,
         max_leaf_nodes=5000,
         max_depth=5000,
@@ -101,24 +87,24 @@ stock_clf = VotingClassifier(
         estimators=[('rf', rnd_clf),  ('sm', soft_clf), ('sv', svm_clf)],
         voting='soft')
 
-#('bc', bag_clf),,('tc', tree_clf)
-#, bag_clf tree_clf,
+for i in range(7):
+    # Test the classifiers
+    for clf in (rnd_clf, soft_clf, svm_clf, stock_clf):
+        # Splitting the data
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-# Test the classifiers
-for clf in (rnd_clf, soft_clf, svm_clf, stock_clf):
-    # Splitting the data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-    
-    # Fitting the models and predicting
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+        # Fitting the models and predicting
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
 
 
-# Test on data not in the set
-y_pred = stock_clf.predict(testX)
-acc = accuracy_score(testY, y_pred)
-print("Test on new data: " + str(acc))
+    # Test on data not in the set
+    y_pred = stock_clf.predict(testX)
+    acc = accuracy_score(testY, y_pred)
+    print("Test on new data: " + str(acc))
+    print("------------------ "+str(i+1)+" ---------------------")
+
 
 '''
 bag_clf = BaggingClassifier(
