@@ -54,7 +54,7 @@ testX3 = scaler.transform(testX3)
 
 # Creating the classifiers to make the voitng classifier
 svm_clf = SVC( # SVM
-#        C=1, # 5
+        C=100, # 100
 #        kernel='poly',
 #        coef0=1.0,
 #        degree=3,
@@ -66,10 +66,10 @@ soft_clf = LogisticRegression( # SoftMmax
         multi_class="multinomial",
         solver="lbfgs",
         n_jobs=-1,
-        C=100, #100
+        C=200, #200
 )
 rnd_clf = RandomForestClassifier( # RandomForest
-        n_estimators=500, #500
+        n_estimators=1000, #500
         bootstrap=True,
         max_samples=1.0, # 1.0
         max_features=7,     # have 7 features here
