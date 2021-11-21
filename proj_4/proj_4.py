@@ -28,8 +28,8 @@ data = rawData.to_numpy()
 # Set some data aside some for extra testing and split into x and y
 
 # Separate the x and y 
-X = data[:-270,1:]
-y = data[:-270,0]
+X = data[90:-270,1:]
+y = data[90:-270,0]
 
 # Grab some subsets of data to test on
 testData = data[-90:,:]
@@ -37,12 +37,16 @@ testX = testData[:,1:]
 testY = testData[:,0]
 
 testData2 = data[-180:-90,:]
-testX2 = testData[:,1:]
-testY2 = testData[:,0]
+testX2 = testData2[:,1:]
+testY2 = testData2[:,0]
 
 testData3 = data[-270:-180,:]
-testX3 = testData[:,1:]
-testY3 = testData[:,0]
+testX3 = testData3[:,1:]
+testY3 = testData3[:,0]
+
+testData4 = data[0:90,:]
+testX4 = testData4[:,1:]
+testY4 = testData4[:,0]
 
 # Scale all the data
 scaler = StandardScaler()
@@ -51,6 +55,7 @@ X = scaler.transform(X)
 testX = scaler.transform(testX)
 testX2 = scaler.transform(testX2)
 testX3 = scaler.transform(testX3)
+testX4 = scaler.transform(testX4)
 
 # Creating the classifiers to make the voitng classifier
 svm_clf = SVC( # SVM
@@ -69,11 +74,11 @@ soft_clf = LogisticRegression( # SoftMmax
         C=200, #200
 )
 rnd_clf = RandomForestClassifier( # RandomForest
-        n_estimators=1000, #500
+        n_estimators=1000, #1000
         bootstrap=True,
         max_samples=1.0, # 1.0
         max_features=7,     # have 7 features here
-#        max_leaf_nodes=75, #5000
+        max_leaf_nodes=100, #100
 #        max_depth=75,     #5000
         min_impurity_decrease= 0.1, #0.1
         n_jobs=-1
@@ -99,16 +104,21 @@ for i in range(5):
 
     # Test on data not in the set
     y_pred = stock_clf.predict(testX)
-    acc = accuracy_score(testY, y_pred)
-    print("Test on new data1: " + str(acc))
+    acc1 = accuracy_score(testY, y_pred)
+    print("Test on new data1: " + str(acc1))
     
     y_pred = stock_clf.predict(testX2)
-    acc = accuracy_score(testY2, y_pred)
-    print("Test on new data2: " + str(acc))
+    acc2 = accuracy_score(testY2, y_pred)
+    print("Test on new data2: " + str(acc2))
     
     y_pred = stock_clf.predict(testX3)
-    acc = accuracy_score(testY3, y_pred)
-    print("Test on new data3: " + str(acc))
+    acc3 = accuracy_score(testY3, y_pred)
+    print("Test on new data3: " + str(acc3))
+    
+    y_pred = stock_clf.predict(testX4)
+    acc4 = accuracy_score(testY4, y_pred)
+    print("Test on new data4: " + str(acc4))
+    print("avg test acc: {}".format((acc1+acc2+acc3+acc4)/4))
     print("---------------"+str(i)+"------------------")
 
 
