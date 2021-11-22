@@ -38,13 +38,8 @@ data = rawData.to_numpy()
 # Set some data aside some for extra testing and split into x and y
 
 # Separate the x and y 
-#X = data[90:-270,1:]
-#y = data[90:-270,0]
 n = random.randint(0, 4000)
 n2 = n + 365
-
-#X = data[:-365,1:]
-#y = data[:-365,0]
 
 X1 = data[:n,1:]
 y1 = data[:n,0]
@@ -54,24 +49,6 @@ y2 = data[n2:,0]
 X=np.concatenate((X1,X2), axis=0)
 y=np.concatenate((y1,y2), axis=0)
 
-'''
-# Grab some subsets of data to test on
-testData = data[-90:,:]
-testX = testData[:,1:]
-testY = testData[:,0]
-
-testData2 = data[-180:-90,:]
-testX2 = testData2[:,1:]
-testY2 = testData2[:,0]
-
-testData3 = data[-270:-180,:]
-testX3 = testData3[:,1:]
-testY3 = testData3[:,0]
-
-testData4 = data[0:90,:]
-testX4 = testData4[:,1:]
-testY4 = testData4[:,0]
-'''
 testData = data[n:n2,:]
 testX = testData[:,1:]
 testY = testData[:,0]
@@ -81,10 +58,6 @@ scaler = StandardScaler()
 scaler.fit(X)
 X = scaler.transform(X)
 testX = scaler.transform(testX)
-#testX = scaler.transform(testX)
-#testX2 = scaler.transform(testX2)
-#testX3 = scaler.transform(testX3)
-#testX4 = scaler.transform(testX4)
 
 # Creating the classifiers to make the voitng classifier
 svm_clf = SVC( # SVM
@@ -94,7 +67,7 @@ svm_clf = SVC( # SVM
         degree=2,
         probability=True,
         gamma="auto",
-        )
+)
 soft_clf = LogisticRegression( # SoftMmax
         multi_class="multinomial",
         solver="lbfgs",
@@ -104,7 +77,7 @@ soft_clf = LogisticRegression( # SoftMmax
 rnd_clf = RandomForestClassifier( # RandomForest
         n_estimators=1000, #1000
         bootstrap=True,
-        max_samples=0.5, # 1.0
+        max_samples=1.0, # 1.0
         max_features=7,     # have 7 features here
         max_leaf_nodes=50, #100 or 50 50 probably
         n_jobs=-1
@@ -118,39 +91,49 @@ stock_clf = VotingClassifier(
 
 
 # Test the classifiers
+# Store the best one based on both accuracies
+bestModel = 0
+bestAvgPercent = 0
+pulledBest = 0
+twentyAcc = 0
 for i in range(5):
-    for clf in (rnd_clf, soft_clf, svm_clf, stock_clf): #
+    for clf in (rnd_clf, soft_clf, svm_clf, stock_clf): 
         # Splitting the data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
         # Fitting the models and predicting
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
-        print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+        acc = accuracy_score(y_test, y_pred)
+        #print(clf.__class__.__name__, acc)
 
-    # Test on data not in the set
+    # Test on data not in the set and calculate model score
     y_pred = stock_clf.predict(testX)
     acc1 = accuracy_score(testY, y_pred)
-    print("Test on new data1: " + str(acc1))
-    print("---------------"+str(i)+"------------------")
-''' 
-    y_pred = stock_clf.predict(testX2)
-    acc2 = accuracy_score(testY2, y_pred)
-    print("Test on new data2: " + str(acc2))
+    avgAcc = (acc + acc1) / 2
     
-    y_pred = stock_clf.predict(testX3)
-    acc3 = accuracy_score(testY3, y_pred)
-    print("Test on new data3: " + str(acc3))
-    
-    y_pred = stock_clf.predict(testX4)
-    acc4 = accuracy_score(testY4, y_pred)
-    print("Test on new data4: " + str(acc4))
-    print("avg test acc: {}".format((acc1+acc2+acc3+acc4)/4))
-'''
+    # Assign the best model if needed
+    if avgAcc > bestAvgPercent:
+        twentyAcc = acc
+        pulledBest = acc1
+        bestAvgPercent = avgAcc
+        bestModel = stock_clf 
+
+    # Print out how the model did
+    #print("Test on pulled data: " + str(acc1))
+    #print("Avg accuracy: " + str(avgAcc))
+    #print("---------------"+str(i)+"------------------")
+
+# Print out the best model
+print("Percent on 20%: " + str(twentyAcc))
+print("Percent on pulled data: " + str(pulledBest))
+
 
 # The code below was used to check out the importance of the features
 # to try and find some that may not be as important or some that are
 # more important than others
+# With this information, you can then trim some data out and then see 
+# how it performs again
 ##########Random Forests###########
 '''
 rnd_clf = RandomForestClassifier(
@@ -169,5 +152,4 @@ print(accuracy_score(y_test, y_pred))
 
 for name, score in zip(rawData, rnd_clf.feature_importances_):
     print(name, score)
-# with this information, you can then trim some data out and then see how it performs again
 '''
