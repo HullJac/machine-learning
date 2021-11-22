@@ -2,10 +2,20 @@
 Program:        Prediciting Stock Data using A Voting Classifier
 Programmer:     Jacob Hull
 Date:           11/23/21
-Description:    This program uses
+Description:    This program uses a voting classifier composed of an SVC, 
+                SoftMax, and RandomForest classifiers. The voting classifier,
+                called stock_clf, is trained on stock market data using an
+                80/20 split and tested to check for accuracy through pulling 
+                out an extra years worth of data before training. This score 
+                is part of how I am basing the successfulness of my model, as 
+                this shows more of how it can perform in a real life situation
+                on new data. The other score that I am basing the successfulness
+                of the model off is the accuracy on the 20% split. Together, these
+                will tell me if the model is doing fairly well overall.
 '''
 import pandas as pd
 import numpy as np
+import random
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -28,9 +38,23 @@ data = rawData.to_numpy()
 # Set some data aside some for extra testing and split into x and y
 
 # Separate the x and y 
-X = data[90:-270,1:]
-y = data[90:-270,0]
+#X = data[90:-270,1:]
+#y = data[90:-270,0]
+n = random.randint(0, 4000)
+n2 = n + 365
 
+#X = data[:-365,1:]
+#y = data[:-365,0]
+
+X1 = data[:n,1:]
+y1 = data[:n,0]
+X2 = data[n2:,1:]
+y2 = data[n2:,0]
+
+X=np.concatenate((X1,X2), axis=0)
+y=np.concatenate((y1,y2), axis=0)
+
+'''
 # Grab some subsets of data to test on
 testData = data[-90:,:]
 testX = testData[:,1:]
@@ -47,25 +71,29 @@ testY3 = testData3[:,0]
 testData4 = data[0:90,:]
 testX4 = testData4[:,1:]
 testY4 = testData4[:,0]
+'''
+testData = data[n:n2,:]
+testX = testData[:,1:]
+testY = testData[:,0]
 
 # Scale all the data
 scaler = StandardScaler()
 scaler.fit(X)
 X = scaler.transform(X)
 testX = scaler.transform(testX)
-testX2 = scaler.transform(testX2)
-testX3 = scaler.transform(testX3)
-testX4 = scaler.transform(testX4)
+#testX = scaler.transform(testX)
+#testX2 = scaler.transform(testX2)
+#testX3 = scaler.transform(testX3)
+#testX4 = scaler.transform(testX4)
 
 # Creating the classifiers to make the voitng classifier
 svm_clf = SVC( # SVM
         C=100, # 100
-#        kernel='poly',
-#        coef0=1.0,
-#        degree=3,
+        kernel='poly',
+        coef0=1.0,
+        degree=2,
         probability=True,
-#        gamma="auto",
-        #max_iter=50000000
+        gamma="auto",
         )
 soft_clf = LogisticRegression( # SoftMmax
         multi_class="multinomial",
@@ -76,11 +104,9 @@ soft_clf = LogisticRegression( # SoftMmax
 rnd_clf = RandomForestClassifier( # RandomForest
         n_estimators=1000, #1000
         bootstrap=True,
-        max_samples=1.0, # 1.0
+        max_samples=0.5, # 1.0
         max_features=7,     # have 7 features here
-        max_leaf_nodes=100, #100
-#        max_depth=75,     #5000
-        min_impurity_decrease= 0.1, #0.1
+        max_leaf_nodes=50, #100 or 50 50 probably
         n_jobs=-1
 )
 
@@ -88,7 +114,7 @@ rnd_clf = RandomForestClassifier( # RandomForest
 # Create the voting classifier
 stock_clf = VotingClassifier(
         estimators=[('rf', rnd_clf), ('sm', soft_clf),('sv', svm_clf)],  #  
-        voting='soft') # , weights=[0.25, 0.50, 0.25])
+        voting='soft')
 
 
 # Test the classifiers
@@ -106,7 +132,8 @@ for i in range(5):
     y_pred = stock_clf.predict(testX)
     acc1 = accuracy_score(testY, y_pred)
     print("Test on new data1: " + str(acc1))
-    
+    print("---------------"+str(i)+"------------------")
+''' 
     y_pred = stock_clf.predict(testX2)
     acc2 = accuracy_score(testY2, y_pred)
     print("Test on new data2: " + str(acc2))
@@ -119,13 +146,7 @@ for i in range(5):
     acc4 = accuracy_score(testY4, y_pred)
     print("Test on new data4: " + str(acc4))
     print("avg test acc: {}".format((acc1+acc2+acc3+acc4)/4))
-    print("---------------"+str(i)+"------------------")
-
-
-###################
-# MONEY STUFF HERE#
-###################
-
+'''
 
 # The code below was used to check out the importance of the features
 # to try and find some that may not be as important or some that are
