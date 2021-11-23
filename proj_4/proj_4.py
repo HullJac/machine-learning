@@ -38,18 +38,20 @@ data = rawData.to_numpy()
 
 # Set some data aside some for extra testing and split into x and y
 
-# Separate the x and y 
 n = random.randint(0, 4000)
 n2 = n + 365
 
+# Separate the x and y 
 X1 = data[:n,1:]
 y1 = data[:n,0]
 X2 = data[n2:,1:]
 y2 = data[n2:,0]
 
+# Add the x's together and the y's together
 X=np.concatenate((X1,X2), axis=0)
 y=np.concatenate((y1,y2), axis=0)
 
+# Create the pulled ot data
 testData = data[n:n2,:]
 testX = testData[:,1:]
 testY = testData[:,0]
@@ -60,23 +62,23 @@ scaler.fit(X)
 X = scaler.transform(X)
 testX = scaler.transform(testX)
 
-# Creating the classifiers to make the voitng classifier
+# Creating the classifiers to put in the voitng classifier
 svm_clf = SVC( # SVM
-        C=100, # 100
+        C=100,
         probability=True,
 )
 soft_clf = LogisticRegression( # SoftMmax
         multi_class="multinomial",
         solver="lbfgs",
         n_jobs=-1,
-        C=200, #200
+        C=200,
 )
 rnd_clf = RandomForestClassifier( # RandomForest
-        n_estimators=1000, #1000
+        n_estimators=1000,
         bootstrap=True,
-        max_samples=1.0, # 1.0
-        max_features=7,     # have 7 features here
-        max_leaf_nodes=50, #100 or 50 50 probably
+        max_samples=1.0,
+        max_features=7,
+        max_leaf_nodes=50,
         n_jobs=-1
 )
 
