@@ -95,7 +95,7 @@ bestModel = 0
 bestAvgPercent = 0
 pulledBest = 0
 twentyAcc = 0
-for i in range(5):
+for i in range(15):
     for clf in (rnd_clf, soft_clf, svm_clf, stock_clf): 
         # Splitting the data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
