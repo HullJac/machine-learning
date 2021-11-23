@@ -1,17 +1,18 @@
 '''
-Program:        Prediciting Stock Data using A Voting Classifier
+Program:        Prediciting Future Stock Data Using A Voting Classifier
 Programmer:     Jacob Hull
 Date:           11/23/21
 Description:    This program uses a voting classifier composed of an SVC, 
-                SoftMax, and RandomForest classifiers. The voting classifier,
+                SoftMax, and RandomForest classifier. The voting classifier,
                 called stock_clf, is trained on stock market data using an
                 80/20 split and tested to check for accuracy through pulling 
                 out an extra years worth of data before training. This score 
                 is part of how I am basing the successfulness of my model, as 
                 this shows more of how it can perform in a real life situation
                 on new data. The other score that I am basing the successfulness
-                of the model off is the accuracy on the 20% split. Together, these
-                will tell me if the model is doing fairly well overall.
+                of the model on is the prediction accuracy on the 20% split. 
+                Together, these will tell me if the model is doing fairly well 
+                overall.
 '''
 import pandas as pd
 import numpy as np
@@ -53,7 +54,7 @@ testData = data[n:n2,:]
 testX = testData[:,1:]
 testY = testData[:,0]
 
-# Scale all the data
+# Scale all the data except the y's
 scaler = StandardScaler()
 scaler.fit(X)
 X = scaler.transform(X)
@@ -62,11 +63,7 @@ testX = scaler.transform(testX)
 # Creating the classifiers to make the voitng classifier
 svm_clf = SVC( # SVM
         C=100, # 100
-        kernel='poly',
-        coef0=1.0,
-        degree=2,
         probability=True,
-        gamma="auto",
 )
 soft_clf = LogisticRegression( # SoftMmax
         multi_class="multinomial",
@@ -86,7 +83,7 @@ rnd_clf = RandomForestClassifier( # RandomForest
 
 # Create the voting classifier
 stock_clf = VotingClassifier(
-        estimators=[('rf', rnd_clf), ('sm', soft_clf),('sv', svm_clf)],  #  
+        estimators=[('rf', rnd_clf), ('sm', soft_clf),('sv', svm_clf)], 
         voting='soft')
 
 
