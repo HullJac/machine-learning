@@ -1,0 +1,7 @@
+Data did not have headers, so I added them.
+
+It also had some missing data in the form of question marks.
+    To fix this, I changed them to -1 using vim and them used the simple imputer to 
+    change them to the mean of the column
+
+
