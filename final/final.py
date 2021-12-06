@@ -20,9 +20,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingClassifier
 
 #####################################################
 
@@ -45,7 +44,9 @@ X = imp.fit_transform(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
 ########random forest#######
-rnd_clf=RandomForestClassifier(n_estimators=500, n_jobs=-1)
+rnd_clf=RandomForestClassifier( #n_estimators=500, 
+                    #n_jobs=-1
+                    )
 
 rnd_clf.fit(X_train,y_train)
 y_pred=rnd_clf.predict(X_test)
@@ -53,16 +54,17 @@ y_pred=rnd_clf.predict(X_test)
 print("Random Forest")
 print(accuracy_score(y_test,y_pred)*100)
 
-
+########ada boost###########
 ada_clf = AdaBoostClassifier(
     DecisionTreeClassifier(
-            max_depth=1
-           #,max_leaf_nodes=i
+            #max_depth=1,
+            #max_leaf_nodes=100
            #  ,max_features=2
            #,min_samples_leaf=i
-            )
-            , n_estimators=30,  # ada boost can do this one with less estimators
+            ),
+            #, n_estimators=50,  # ada boost can do this one with less estimators
     algorithm="SAMME.R", learning_rate=1.0)
+
 ada_clf.fit(X_train, y_train)
 y_pred=ada_clf.predict(X_test)
 score=accuracy_score(y_test,y_pred)
@@ -74,18 +76,16 @@ print(score*100)
 ###############################################
 #Gradient boost
 
-#Takes weak regressors and makes them strong
+# Takes weak regressors and makes them strong
 # This is how you would fit a classification routine like this too
-gb = GradientBoostingRegressor(
-        max_depth=2, 
-        n_estimators=10, 
-        learning_rate=1.0, 
+gb = GradientBoostingClassifier(
+        #max_depth=1000,        #5
+        #n_estimators=10000,    #10
+        #learning_rate=.1,  #1.0
         )
 
-gb.fit(X,y)
+gb.fit(X_train,y_train)
+score = gb.score(X_test, y_test)
 
 print("gradient boost")
-print(gb.score(X_test, y_test)*100)
-
-# this is all based on trees, whereas adaboost can use anything
-# next time, wrtite a routine to find the perfect amount of trees
+print(score*100)

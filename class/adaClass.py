@@ -142,8 +142,7 @@ plt.show()
 # not very impressive
 
 
-
-################3
+################
 
 from sklearn.ensemble import GradientBoostingRegressor
 # this just automates what we were doing 

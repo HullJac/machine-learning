@@ -5,3 +5,8 @@ It also had some missing data in the form of question marks.
     change them to the mean of the column
 
 
+I then tried to get a baseline for how a few classifiers would do and I tried
+random forest, adaboost, and gradient boost.  
+All three classifiers gave me about 40 - 60 percent accuracy depending on the run and data
+
+
