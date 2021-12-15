@@ -26,22 +26,18 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import learning_curve
 
 #####################################################
-'''
-Find good fit for 5 categories and learning curves, then move to binary classification
-'''
 
 # Grab the data
 rawData = pd.read_csv('heart.csv')
 
+# Block below gets info about the data and creates a heat map of the data
 '''
-# Get info about the data
 print("-------------------")
 rawData.info()
 print("-------------------")
 print(rawData.describe())
 print("-------------------")
 
-# Create a heat map of the data
 f,ax = plt.subplots(figsize=(18, 18))
 sns.heatmap(rawData.corr(), annot=True, linewidths=.5, fmt= '.1f',ax=ax)
 plt.show()
@@ -60,15 +56,187 @@ y = data[:,-1]
 # Clean the data = taking out all the "-1" and replacing them with the most occuring value
 X = imp.fit_transform(X)
 
-#for i in range(20):
-####################
-#np.random.seed(i)#########
-##################
-
+# Split the data for testing and training 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3) #, random_state = i)
 
-# Code in comment below was used to find the best parameters for gradient boost
+
+
+#####################
+#Logistic Regression#
+#####################
+log_clf = LogisticRegression(   
+        max_iter = 1000000,
+        multi_class='multinomial',
+        C = 0.35,
+        solver = 'newton-cg'
+)
+
+log_clf.fit(X_train, y_train)
+train = log_clf.score(X_train, y_train)
+y_pred = log_clf.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+
+print("Logistic Regression")
+print("Train = " + str(train) + "\nTest  = " +str(acc))
+
+
+# Code for learning curve below taken from 
+# https://vitalflux.com/learning-curves-explained-python-sklearn-example/
+# I just changed the parameters to fit my data
+train_sizes, train_scores, test_scores = learning_curve(
+            estimator=log_clf, 
+            X=X,
+            y=y,
+            #cv=5, 
+            train_sizes=np.linspace(0.1, 1.0, 25), 
+            n_jobs=-1
+        )
+
+train_mean = np.mean(train_scores, axis=1)
+train_std = np.std(train_scores, axis=1)
+test_mean = np.mean(test_scores, axis=1)
+test_std = np.std(test_scores, axis=1)
+#
+# Plot the learning curve
+#
+plt.plot(train_sizes, train_mean, color='blue', marker='o', markersize=5, label='Training Accuracy')
+plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, alpha=0.15, color='blue')
+plt.plot(train_sizes, test_mean, color='green', marker='+', markersize=5, linestyle='--', label='Validation Accuracy')
+plt.fill_between(train_sizes, test_mean + test_std, test_mean - test_std, alpha=0.15, color='green')
+plt.title('Logistic Regression Learning Curve')
+plt.xlabel('Training Data Size')
+plt.ylabel('Model accuracy')
+plt.grid()
+plt.legend(loc='lower right')
+plt.show()
+
+
+# Lists and grid seach helped to find the best C value and solver method
+# From these, I tuned them based on the learning curve to generalize better
+'''
+percents = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
+solves = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+
+log_params = {"C" : percents}
+log_params2 = {"solver" : solves}
+
+grid = GridSearchCV(estimator=log_clf, param_grid=log_params)
+grid.fit(X_train, y_train)
+print(grid)
+print(grid.best_score_)
+print(grid.best_estimator_.C)
+#print(grid.best_estimator_.solver)
+'''
+
+
+
+###########
+#Ada Boost#
+###########
+ada_clf = AdaBoostClassifier(
+    DecisionTreeClassifier(
+        max_depth = 1
+    ), 
+    n_estimators=26, 
+    algorithm="SAMME.R", 
+    learning_rate=.25
+)
+
+ada_clf.fit(X_train, y_train)
+train = ada_clf.score(X_train, y_train)
+y_pred = ada_clf.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+
+print("ada boost")
+print("Train = " + str(train) + "\nTest  = " +str(acc))
+
+
+# Code for learning curve below taken from 
+# https://vitalflux.com/learning-curves-explained-python-sklearn-example/
+# I just changed the parameters to fit my data
+train_sizes, train_scores, test_scores = learning_curve(
+            estimator=ada_clf, 
+            X=X,
+            y=y,
+            #cv=5,
+            train_sizes=np.linspace(0.1, 1.0, 25), 
+            n_jobs=-1
+        )
+
+train_mean = np.mean(train_scores, axis=1)
+train_std = np.std(train_scores, axis=1)
+test_mean = np.mean(test_scores, axis=1)
+test_std = np.std(test_scores, axis=1)
+#
+# Plot the learning curve
+#
+plt.plot(train_sizes, train_mean, color='blue', marker='o', markersize=5, label='Training Accuracy')
+plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, alpha=0.15, color='blue')
+plt.plot(train_sizes, test_mean, color='green', marker='+', markersize=5, linestyle='--', label='Validation Accuracy')
+plt.fill_between(train_sizes, test_mean + test_std, test_mean - test_std, alpha=0.15, color='green')
+plt.title('Ada Boost Learning Curve')
+plt.xlabel('Training Data Size')
+plt.ylabel('Model accuracy')
+plt.grid()
+plt.legend(loc='lower right')
+plt.show()
+
+
+################
+#Gradient Boost#
+################
+gb_clf = GradientBoostingClassifier(
+        n_estimators = 12,
+        max_depth = 1,
+        learning_rate = 0.33,    #.33
+        min_samples_split = 0.7, #.7
+        min_samples_leaf = 0.15, #.15
+        max_features = 6
+)
+
+gb_clf.fit(X_train, y_train)
+train = gb_clf.score(X_train, y_train)
+y_pred = gb_clf.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+
+print("Gradient Boost")
+print("Train = " + str(train) + "\nTest  = " +str(acc))
+
+
+# Code for learning curve below taken from 
+# https://vitalflux.com/learning-curves-explained-python-sklearn-example/
+# I just changed the parameters to fit my data
+train_sizes, train_scores, test_scores = learning_curve(
+            estimator=gb_clf, 
+            X=X,
+            y=y,
+            #cv=5,
+            train_sizes=np.linspace(0.01, 1.0, 50), 
+            n_jobs=-1
+        )
+
+train_mean = np.mean(train_scores, axis=1)
+train_std = np.std(train_scores, axis=1)
+test_mean = np.mean(test_scores, axis=1)
+test_std = np.std(test_scores, axis=1)
+#
+# Plot the learning curve
+#
+plt.plot(train_sizes, train_mean, color='blue', marker='o', markersize=5, label='Training Accuracy')
+plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, alpha=0.15, color='blue')
+plt.plot(train_sizes, test_mean, color='green', marker='+', markersize=5, linestyle='--', label='Validation Accuracy')
+plt.fill_between(train_sizes, test_mean + test_std, test_mean - test_std, alpha=0.15, color='green')
+plt.title('Gradient Boost Learning Curve')
+plt.xlabel('Training Data Size')
+plt.ylabel('Model accuracy')
+plt.grid()
+plt.legend(loc='lower right')
+plt.show()
+
+
+# Code in comment block below was used to find the best parameters for gradient boost
 # This was done with the grid search technique
+# From these, I tuned them based on the learning curve to generalize better
 '''
 for i in range(1,10):
     est = i * 100
@@ -97,201 +265,26 @@ ests = np.array(ests)
 lr = np.array(lr)
 minSamplesLeaf = np.array(leafs)
 percents = np.array(percents)
-'''
 
+params = {
+    #"n_estimators" : ests,
+    #"max_depth" : deps,
+    #"learning_rate" : lr,
+    #"min_samples_split" : percents,
+    #"min_samples_leaf" : minSamplesLeaf
+}
 
-'''
-#######Voting classifier##########
-
-log_clf = LogisticRegression(   
-        max_iter = 10000000,
-        multi_class='multinomial',
-        C = 0.1
-)
-
-rnd_clf = RandomForestClassifier(
-        n_estimators = 150,
-        max_depth = 25,
-        n_jobs = -1,
-
-)
-
-svm_clf = SVC(
-        gamma='auto',
-        probability = True
-)
-
-vote_clf = VotingClassifier(
-    estimators = [
-        #('log', log_clf), 
-        ('rnd', rnd_clf), 
-        ('svm', svm_clf)
-    ],
-    voting = 'soft'
-)
-
-for clf in (log_clf, rnd_clf, svm_clf, vote_clf):
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
-'''
-
-percents = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
-solves = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
-
-########Logistic Regression########
-log_clf = LogisticRegression(   
-        max_iter = 1000000,
-        multi_class='multinomial',
-        C = 1,
-        #solver = 'newton-cg'
-)
-
-log_clf.fit(X_train, y_train)
-train = log_clf.score(X_train, y_train)
-y_pred = log_clf.predict(X_test)
-acc = accuracy_score(y_test, y_pred)
-
-print("Logistic Regression")
-print(str(train) + ":" + str(acc))
-
-# Helped to find the best C value and solver
-log_params = {"C" : percents}
-log_params2 = {"solver" : solves}
-
-grid = GridSearchCV(estimator=log_clf, param_grid=log_params)
-grid.fit(X_train, y_train)
-print(grid)
-print(grid.best_score_)
-print(grid.best_estimator_.C)
-#print(grid.best_estimator_.solver)
-
-'''
-# Code for learning curve below taken from 
-# https://vitalflux.com/learning-curves-explained-python-sklearn-example/
-# I just changed the parameters to fit my data
-train_sizes, train_scores, test_scores = learning_curve(
-            estimator=log_clf, 
-            X=X,
-            y=y,
-            #cv=5, 
-            train_sizes=np.linspace(0.1, 1.0, 25), 
-            n_jobs=-1
-        )
-
-train_mean = np.mean(train_scores, axis=1)
-train_std = np.std(train_scores, axis=1)
-test_mean = np.mean(test_scores, axis=1)
-test_std = np.std(test_scores, axis=1)
-#
-# Plot the learning curve
-#
-plt.plot(train_sizes, train_mean, color='blue', marker='o', markersize=5, label='Training Accuracy')
-plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, alpha=0.15, color='blue')
-plt.plot(train_sizes, test_mean, color='green', marker='+', markersize=5, linestyle='--', label='Validation Accuracy')
-plt.fill_between(train_sizes, test_mean + test_std, test_mean - test_std, alpha=0.15, color='green')
-plt.title('Learning Curve')
-plt.xlabel('Training Data Size')
-plt.ylabel('Model accuracy')
-plt.grid()
-plt.legend(loc='lower right')
-plt.show()
-'''
-
-########random forest##############
-'''
-rnd_clf=RandomForestClassifier( 
-                    n_estimators = est,
-                    max_depth = depth,
-                    n_jobs = -1
-)
-
-rnd_clf.fit(X_train, y_train)
-train = rnd_clf.score(X_train, y_train)
-test = rnd_clf.predict(X_test, y_test)
-
-print("Random Forest")
-print(str(train) + ":" + str(test))
-'''
-
-
-
-#########Gradient boost###############
-gb_clf = GradientBoostingClassifier(
-        n_estimators = 12,
-        max_depth = 2,
-        learning_rate = 0.33,
-        min_samples_split = 0.7,
-        min_samples_leaf = 0.15,
-)
-
-
-
-
-#    params = {
-        #"n_estimators" : ests,
-        #"max_depth" : deps,
-        #"learning_rate" : lr,
-        #"min_samples_split" : percents,
-        #"min_samples_leaf" : minSamplesLeaf
-#            }
-'''
-gb_clf.fit(X_train, y_train)
-train = gb_clf.score(X_train, y_train)
-y_pred = gb_clf.predict(X_test)
-acc = accuracy_score(y_test, y_pred)
-
-print("gradient boost")
-print(str(train) + ":" + str(acc))
-'''
-
-'''
-# Code for learning curve below taken from 
-# https://vitalflux.com/learning-curves-explained-python-sklearn-example/
-# I just changed the parameters to fit my data
-train_sizes, train_scores, test_scores = learning_curve(
-            estimator=gb_clf, 
-            X=X,
-            y=y,
-            #cv=5, 
-            train_sizes=np.linspace(0.1, 1.0, 25), 
-            n_jobs=-1
-        )
-
-train_mean = np.mean(train_scores, axis=1)
-train_std = np.std(train_scores, axis=1)
-test_mean = np.mean(test_scores, axis=1)
-test_std = np.std(test_scores, axis=1)
-#
-# Plot the learning curve
-#
-plt.plot(train_sizes, train_mean, color='blue', marker='o', markersize=5, label='Training Accuracy')
-plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, alpha=0.15, color='blue')
-plt.plot(train_sizes, test_mean, color='green', marker='+', markersize=5, linestyle='--', label='Validation Accuracy')
-plt.fill_between(train_sizes, test_mean + test_std, test_mean - test_std, alpha=0.15, color='green')
-plt.title('Learning Curve')
-plt.xlabel('Training Data Size')
-plt.ylabel('Model accuracy')
-plt.grid()
-plt.legend(loc='lower right')
-plt.show()
-'''
-
-'''
-# Used to tune parameters 
 #print(ada_clf.get_params().keys())
 grid = GridSearchCV(estimator=gb_clf, param_grid = params)
 grid.fit(X_train, y_train)
 #print(grid)
 print(grid.best_score_)
-#print(grid.best_estimator_.n_estimators)
-#print(grid.best_estimator_.max_depth)
+print(grid.best_estimator_.n_estimators)
+print(grid.best_estimator_.max_depth)
 print(grid.best_estimator_.learning_rate)
-#print(grid.best_estimator_.min_samples_split)
-#print(grid.best_estimator_.min_samples_leaf)
+print(grid.best_estimator_.min_samples_split)
+print(grid.best_estimator_.min_samples_leaf)
 '''
-
-print("######################################")
 
 '''
 https://machinelearningmastery.com/improve-deep-learning-performance/ 
