@@ -2,8 +2,23 @@
 Program:        Prediciting Heart Disease In Patients Using Gradient Boost and Voting Classifiers
 Programmer:     Jacob Hull
 Date:           12/16/21
-Description:    This program 
+Description:    This program trains three different machine learning models and tests their
+                accuracy on predicting heart disease using learning curves. The heart disease 
+                data comes from the Celveland Clinic Foundation, and was provided by 
+                Robert Detrano, M.D., Ph.D. and David Aha. The data is cleaned with this
+                code by using a simple imputer and putting the most commly occuring value in 
+                place of the missing values. The models used for classification in the program
+                are logistic regression, ada boost classifier, and gradient boost classifier.
+
+
+                To run the program, you need Python 3.9 or above and all the imported libraries
+                listed below in the imports section. To execute the program, you can simple call
+                "python3 final.py" as long as the heart.csv data file is in the working directory.
 '''
+
+##########
+# Imports#
+##########
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -57,14 +72,14 @@ y = data[:,-1]
 X = imp.fit_transform(X)
 
 # Split the data for testing and training 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3) #, random_state = i)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
 
 
 #####################
 #Logistic Regression#
 #####################
-log_clf = LogisticRegression(   
+log_clf = LogisticRegression(
         max_iter = 1000000,
         multi_class='multinomial',
         C = 0.35,
@@ -88,7 +103,7 @@ train_sizes, train_scores, test_scores = learning_curve(
             X=X,
             y=y,
             #cv=5, 
-            train_sizes=np.linspace(0.1, 1.0, 25), 
+            train_sizes=np.linspace(0.01, 1.0, 50), 
             n_jobs=-1
         )
 
@@ -159,7 +174,7 @@ train_sizes, train_scores, test_scores = learning_curve(
             X=X,
             y=y,
             #cv=5,
-            train_sizes=np.linspace(0.1, 1.0, 25), 
+            train_sizes=np.linspace(0.01, 1.0, 50), 
             n_jobs=-1
         )
 
@@ -188,9 +203,9 @@ plt.show()
 gb_clf = GradientBoostingClassifier(
         n_estimators = 12,
         max_depth = 1,
-        learning_rate = 0.33,    #.33
-        min_samples_split = 0.7, #.7
-        min_samples_leaf = 0.15, #.15
+        learning_rate = 0.33,
+        min_samples_split = 0.7,
+        min_samples_leaf = 0.15,
         max_features = 6
 )
 
