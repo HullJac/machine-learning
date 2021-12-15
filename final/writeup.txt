@@ -1,12 +1,26 @@
 Data did not have headers, so I added them.
 
 It also had some missing data in the form of question marks.
-    To fix this, I changed them to -1 using vim and them used the simple imputer to 
-    change them to the mean of the column
+    To fix this, I changed them to -1 using vim and them used the simple imputer
+    to change them to the most occuring value of the column.
+    I chose this method because the features that have missing data
+    do not contain continuious data.
 
+Before running any tests on the data, I wanted to get some information about the data.
+To do this, I used pandas .info() function and .describe() function.
+These layed out what types of data I am dealing with and statistics of each.
+All the data is in numberical float form except the y is an int between 0-4.
+I also received information like the mean, standard deviation, min, and max. 
+This helped me to get a sense of what the data may look like and see if any feature i
+has any data that may stick out and be an outlier.
+
+
+I then created a heatmap based on the correlation of the data to see if any 
+features stuck out. None stuck out very much, as they were all fairly under 50%,
+but there was one feature that has a fairly high negative correlation to y.
+This feature was the thal. This could also be because of the negative values put in 
 
 I then tried to get a baseline for how a few classifiers would do and I tried
 random forest, adaboost, and gradient boost.  
+
 All three classifiers gave me about 40 - 60 percent accuracy depending on the run and data
-
-
