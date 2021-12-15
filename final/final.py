@@ -26,6 +26,9 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import learning_curve
 
 #####################################################
+'''
+Find good fit for 5 categories and learning curves, then move to binary classification
+'''
 
 # Grab the data
 rawData = pd.read_csv('heart.csv')
@@ -54,7 +57,7 @@ imp = SimpleImputer(missing_values=-1, strategy='most_frequent')
 X = data[:,:-1]
 y = data[:,-1]
 
-# Clean the data - taking out all the "-1" and replacing them with the most occuring value
+# Clean the data = taking out all the "-1" and replacing them with the most occuring value
 X = imp.fit_transform(X)
 
 #for i in range(20):
@@ -64,41 +67,139 @@ X = imp.fit_transform(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3) #, random_state = i)
 
+# Code in comment below was used to find the best parameters for gradient boost
+# This was done with the grid search technique
 '''
 for i in range(1,10):
     est = i * 100
     print(est)
     depth = i * 10
     print(depth)
+    est = 150
+    depth = 25
+
+# Lists of parameters to test
+percents = [.3,.4,.5,.6,.7]
+leafs = [.1,.2,.3,.4,.5]
+ests = []
+deps = []
+lr = []
+
+# Fill lists if needed
+for i in range(1,11):
+   #ests.append(i*3)
+   #deps.append(i*2)
+    lr.append(i/10)
+
+# Turn lists to numpy arrays
+deps = np.array(deps)
+ests = np.array(ests)
+lr = np.array(lr)
+minSamplesLeaf = np.array(leafs)
+percents = np.array(percents)
 '''
-#    est = 150
-#    depth = 25
 
-# lists of parameters to test
-#percents = [.3,.4,.5,.6,.7]
-#leafs = [.1,.2,.3,.4,.5]
-#ests = []
-#deps = []
-#lr = []
 
-# fill lists if needed
-#for i in range(1,11):
-    #ests.append(i*3)
-    #deps.append(i*2)
-#    lr.append(i/10)
-
-# turn lists to numpy arrays
-#deps = np.array(deps)
-#ests = np.array(ests)
-#lr = np.array(lr)
-#minSamplesLeaf = np.array(leafs)
-#percents = np.array(percents)
-
+'''
 #######Voting classifier##########
 
+log_clf = LogisticRegression(   
+        max_iter = 10000000,
+        multi_class='multinomial',
+        C = 0.1
+)
+
+rnd_clf = RandomForestClassifier(
+        n_estimators = 150,
+        max_depth = 25,
+        n_jobs = -1,
+
+)
+
+svm_clf = SVC(
+        gamma='auto',
+        probability = True
+)
+
+vote_clf = VotingClassifier(
+    estimators = [
+        #('log', log_clf), 
+        ('rnd', rnd_clf), 
+        ('svm', svm_clf)
+    ],
+    voting = 'soft'
+)
+
+for clf in (log_clf, rnd_clf, svm_clf, vote_clf):
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+'''
+
+percents = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
+solves = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+
+########Logistic Regression########
+log_clf = LogisticRegression(   
+        max_iter = 1000000,
+        multi_class='multinomial',
+        C = 1,
+        #solver = 'newton-cg'
+)
+
+log_clf.fit(X_train, y_train)
+train = log_clf.score(X_train, y_train)
+y_pred = log_clf.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+
+print("Logistic Regression")
+print(str(train) + ":" + str(acc))
+
+# Helped to find the best C value and solver
+log_params = {"C" : percents}
+log_params2 = {"solver" : solves}
+
+grid = GridSearchCV(estimator=log_clf, param_grid=log_params)
+grid.fit(X_train, y_train)
+print(grid)
+print(grid.best_score_)
+print(grid.best_estimator_.C)
+#print(grid.best_estimator_.solver)
 
 '''
+# Code for learning curve below taken from 
+# https://vitalflux.com/learning-curves-explained-python-sklearn-example/
+# I just changed the parameters to fit my data
+train_sizes, train_scores, test_scores = learning_curve(
+            estimator=log_clf, 
+            X=X,
+            y=y,
+            #cv=5, 
+            train_sizes=np.linspace(0.1, 1.0, 25), 
+            n_jobs=-1
+        )
+
+train_mean = np.mean(train_scores, axis=1)
+train_std = np.std(train_scores, axis=1)
+test_mean = np.mean(test_scores, axis=1)
+test_std = np.std(test_scores, axis=1)
+#
+# Plot the learning curve
+#
+plt.plot(train_sizes, train_mean, color='blue', marker='o', markersize=5, label='Training Accuracy')
+plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, alpha=0.15, color='blue')
+plt.plot(train_sizes, test_mean, color='green', marker='+', markersize=5, linestyle='--', label='Validation Accuracy')
+plt.fill_between(train_sizes, test_mean + test_std, test_mean - test_std, alpha=0.15, color='green')
+plt.title('Learning Curve')
+plt.xlabel('Training Data Size')
+plt.ylabel('Model accuracy')
+plt.grid()
+plt.legend(loc='lower right')
+plt.show()
+'''
+
 ########random forest##############
+'''
 rnd_clf=RandomForestClassifier( 
                     n_estimators = est,
                     max_depth = depth,
@@ -112,6 +213,8 @@ test = rnd_clf.predict(X_test, y_test)
 print("Random Forest")
 print(str(train) + ":" + str(test))
 '''
+
+
 
 #########Gradient boost###############
 gb_clf = GradientBoostingClassifier(
@@ -142,6 +245,7 @@ print("gradient boost")
 print(str(train) + ":" + str(acc))
 '''
 
+'''
 # Code for learning curve below taken from 
 # https://vitalflux.com/learning-curves-explained-python-sklearn-example/
 # I just changed the parameters to fit my data
@@ -171,7 +275,7 @@ plt.ylabel('Model accuracy')
 plt.grid()
 plt.legend(loc='lower right')
 plt.show()
-
+'''
 
 '''
 # Used to tune parameters 
