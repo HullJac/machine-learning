@@ -21,6 +21,6 @@ but there was one feature that has a fairly high negative correlation to y.
 This feature was the thal. This could also be because of the negative values put in 
 
 I then tried to get a baseline for how a few classifiers would do and I tried
-linear regression, adaboost, and gradient boost.  
+logistic regression, adaboost, and gradient boost.  
 
 All three classifiers gave me about 40 - 60 percent accuracy depending on the run and data
