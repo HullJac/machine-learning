@@ -21,9 +21,9 @@ Description:    This program trains three different machine learning classifiers
                 "heart.csv" data file is in the working directory.
 '''
 
-##########
-# Imports#
-##########
+###########
+# Imports #
+###########
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -31,15 +31,9 @@ import matplotlib.pyplot as plt
 
 from pandas.plotting import scatter_matrix
 from sklearn.model_selection import train_test_split
-from matplotlib.colors import ListedColormap
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import VotingClassifier
-from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
-from sklearn.ensemble import BaggingClassifier
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier
@@ -51,10 +45,12 @@ from sklearn.model_selection import learning_curve
 # Grab the data
 rawData = pd.read_csv('heart.csv')
 
-# scatter matrix
+# Scatter matrix
+'''
 attributes = ['age','sex','cp','trestbps','chol','fbs','restecg','thalach','exang','oldpeak','slope','ca','thal','y']
 scatter_matrix(rawData[attributes])
 plt.show()
+'''
 
 # Block below gets info about the data and creates a heat map of the data
 '''
@@ -87,9 +83,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
 
 
-#####################
-#Logistic Regression#
-#####################
+#######################
+# Logistic Regression #
+#######################
 log_clf = LogisticRegression(
         max_iter = 1000000,
         multi_class='multinomial',
@@ -113,7 +109,6 @@ train_sizes, train_scores, test_scores = learning_curve(
             estimator=log_clf, 
             X=X,
             y=y,
-            #cv=5, 
             train_sizes=np.linspace(0.01, 1.0, 50), 
             n_jobs=-1
         )
@@ -141,7 +136,7 @@ plt.show()
 # From these, I tuned them based on the learning curve to generalize better
 '''
 percents = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
-solves = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+#solves = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
 
 log_params = {"C" : percents}
 log_params2 = {"solver" : solves}
@@ -156,9 +151,9 @@ print(grid.best_estimator_.C)
 
 
 
-###########
-#Ada Boost#
-###########
+#############
+# Ada Boost #
+#############
 ada_clf = AdaBoostClassifier(
     DecisionTreeClassifier(
         max_depth = 1
@@ -173,7 +168,7 @@ train = ada_clf.score(X_train, y_train)
 y_pred = ada_clf.predict(X_test)
 acc = accuracy_score(y_test, y_pred)
 
-print("ada boost")
+print("Ada Boost")
 print("Train = " + str(train) + "\nTest  = " +str(acc))
 
 
@@ -184,7 +179,6 @@ train_sizes, train_scores, test_scores = learning_curve(
             estimator=ada_clf, 
             X=X,
             y=y,
-            #cv=5,
             train_sizes=np.linspace(0.01, 1.0, 50), 
             n_jobs=-1
         )
@@ -208,9 +202,9 @@ plt.legend(loc='lower right')
 plt.show()
 
 
-################
-#Gradient Boost#
-################
+##################
+# Gradient Boost #
+##################
 gb_clf = GradientBoostingClassifier(
         n_estimators = 12,
         max_depth = 1,
@@ -236,7 +230,6 @@ train_sizes, train_scores, test_scores = learning_curve(
             estimator=gb_clf, 
             X=X,
             y=y,
-            #cv=5,
             train_sizes=np.linspace(0.01, 1.0, 50), 
             n_jobs=-1
         )
@@ -281,8 +274,8 @@ lr = []
 
 # Fill lists if needed
 for i in range(1,11):
-   #ests.append(i*3)
-   #deps.append(i*2)
+    ests.append(i*3)
+    deps.append(i*2)
     lr.append(i/10)
 
 # Turn lists to numpy arrays
@@ -293,11 +286,11 @@ minSamplesLeaf = np.array(leafs)
 percents = np.array(percents)
 
 params = {
-    #"n_estimators" : ests,
-    #"max_depth" : deps,
-    #"learning_rate" : lr,
-    #"min_samples_split" : percents,
-    #"min_samples_leaf" : minSamplesLeaf
+    "n_estimators" : ests,
+    "max_depth" : deps,
+    "learning_rate" : lr,
+    "min_samples_split" : percents,
+    "min_samples_leaf" : minSamplesLeaf
 }
 
 #print(ada_clf.get_params().keys())
@@ -310,8 +303,4 @@ print(grid.best_estimator_.max_depth)
 print(grid.best_estimator_.learning_rate)
 print(grid.best_estimator_.min_samples_split)
 print(grid.best_estimator_.min_samples_leaf)
-'''
-
-'''
-https://machinelearningmastery.com/improve-deep-learning-performance/ 
 '''
