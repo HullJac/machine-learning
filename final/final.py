@@ -2,18 +2,23 @@
 Program:        Prediciting Heart Disease In Patients Using Gradient Boost and Voting Classifiers
 Programmer:     Jacob Hull
 Date:           12/16/21
-Description:    This program trains three different machine learning models and tests their
-                accuracy on predicting heart disease using learning curves. The heart disease 
-                data comes from the Celveland Clinic Foundation, and was provided by 
+Description:    This program trains three different machine learning classifiers and tests their
+                accuracy of predicting heart disease using learning curves. The heart disease 
+                data comes from the Cleveland Clinic Foundation, and was provided by 
                 Robert Detrano, M.D., Ph.D. and David Aha. The data is cleaned with this
                 code by using a simple imputer and putting the most commly occuring value in 
                 place of the missing values. The models used for classification in the program
                 are logistic regression, ada boost classifier, and gradient boost classifier.
+                These are trained using a 75/25 split of the data at random and are check for 
+                accuracy based on the remaining 25 percent of data that was not used during 
+                training. The accuracies of the training and testing of each model are printed 
+                to the screen along with the learning curve for each. 
 
 
                 To run the program, you need Python 3.9 or above and all the imported libraries
-                listed below in the imports section. To execute the program, you can simple call
-                "python3 final.py" as long as the heart.csv data file is in the working directory.
+                listed below in the imports section installed on your machine or environment. 
+                To execute the program, you can simple call "python3 final.py" as long as the 
+                "heart.csv" data file is in the working directory.
 '''
 
 ##########
@@ -24,6 +29,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from pandas.plotting import scatter_matrix
 from sklearn.model_selection import train_test_split
 from matplotlib.colors import ListedColormap
 from sklearn.impute import SimpleImputer
@@ -44,6 +50,11 @@ from sklearn.model_selection import learning_curve
 
 # Grab the data
 rawData = pd.read_csv('heart.csv')
+
+# scatter matrix
+attributes = ['age','sex','cp','trestbps','chol','fbs','restecg','thalach','exang','oldpeak','slope','ca','thal','y']
+scatter_matrix(rawData[attributes])
+plt.show()
 
 # Block below gets info about the data and creates a heat map of the data
 '''
